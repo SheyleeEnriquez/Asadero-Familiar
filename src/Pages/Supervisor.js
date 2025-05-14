@@ -1,39 +1,34 @@
 import React from 'react';
-import { UserCog, PackagePlus } from 'lucide-react';
+import '../Styles/Supervisor.css';
+import logo from '../Assets/logo.png';
+import empleado from '../Assets/empleado.png';
+import ventas from '../Assets/ventas.png';
 
 const supervisorOptions = [
-  {
-    title: 'Gestionar Cuenta de Empleados',
-    icon: <UserCog size={48} className="text-indigo-600" />,
-    onClick: () => alert('Ir a gestionar cuenta de empleados'),
-  },
-  {
-    title: 'Registrar Stock',
-    icon: <PackagePlus size={48} className="text-indigo-600" />,
-    onClick: () => alert('Ir a registrar stock'),
-  },
+  { title: 'Gestionar Cuenta de Empleados', img: empleado, imgAlt: 'empleado' },
+  { title: 'Registrar Stock', img: ventas, imgAlt: 'ventas' },
 ];
 
 const SupervisorPage = () => {
   return (
-    <div className="min-h-screen bg-indigo-50">
+    <div className="supervisor-page">
       {/* Header */}
-      <header className="bg-indigo-600 text-white py-4 shadow-md">
-        <h1 className="text-2xl text-center font-semibold">Panel del Supervisor</h1>
+      <header className="supervisor-header">
+        <img src={logo} alt="Asadero Familiar Logo" className="logo" />
+        <h1 className="supervisor-title">Panel del Supervisor</h1>
       </header>
 
       {/* Contenedor principal */}
-      <main className="max-w-4xl mx-auto py-10 px-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <main className="supervisor-container">
+        <div className="supervisor-grid">
           {supervisorOptions.map((option, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition"
-            >
-              {option.icon}
+            <div key={index} className="supervisor-card">
+              <div className="supervisor-img-placeholder">
+                <img src={option.img} alt={option.imgAlt} className="admin-img" />
+              </div>
               <button
-                onClick={option.onClick}
-                className="mt-4 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-xl transition"
+                className="supervisor-btn"
+                onClick={() => alert(`Ir a ${option.title.toLowerCase()}`)}
               >
                 {option.title}
               </button>

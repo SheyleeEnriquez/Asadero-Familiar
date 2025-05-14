@@ -1,0 +1,81 @@
+.admin-page {
+  min-height: 100vh;
+  background-color: #e0f2fe; /* sky-50 */
+}
+
+.admin-header {
+  background-color: #0284c7; /* sky-600 */
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.admin-logo {
+  height: 50px;
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.admin-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.admin-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-rows: repeat(2, auto);
+  gap: 1.5rem;
+}
+
+.admin-card {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: box-shadow 0.3s ease;
+}
+
+.admin-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.admin-img-placeholder {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-img {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.admin-btn {
+  background-color: #0ea5e9; /* sky-500 */
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.admin-btn:hover {
+  background-color: #0284c7; /* sky-600 */
+}

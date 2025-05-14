@@ -1,54 +1,40 @@
 import React from 'react';
-import { Users, Settings, FileBarChart, UserCog, Boxes } from 'lucide-react';
+import '../Styles/Admin.css';
+import logo from '../Assets/logo.png';
+import cliente from '../Assets/cliente.png';
+import empleado from '../Assets/empleado.png';
+import stock from '../Assets/stock.png';
+
 
 const adminOptions = [
-  {
-    title: 'Gestionar Clientes',
-    icon: <Users size={48} className="text-sky-600" />,
-    onClick: () => alert('Ir a gestionar clientes'),
-  },
-  {
-    title: 'Panel Administrativo',
-    icon: <Settings size={48} className="text-sky-600" />,
-    onClick: () => alert('Ir al panel administrativo'),
-  },
-  {
-    title: 'Generar Reportes',
-    icon: <FileBarChart size={48} className="text-sky-600" />,
-    onClick: () => alert('Ir a reportes'),
-  },
-  {
-    title: 'Gestionar Cuenta de Empleados',
-    icon: <UserCog size={48} className="text-sky-600" />,
-    onClick: () => alert('Ir a empleados'),
-  },
-  {
-    title: 'Gestionar Inventario',
-    icon: <Boxes size={48} className="text-sky-600" />,
-    onClick: () => alert('Ir al inventario'),
-  },
+  { title: 'Gestionar Clientes', img: cliente, imgAlt: 'cliente' },
+  { title: 'Panel Administrativo', img: empleado, imgAlt: 'Panel' },
+  { title: 'Generar Reportes', img: stock, imgAlt: 'Reportes' },
+  { title: 'Gestionar Cuenta de Empleados', img: empleado, imgAlt: 'Empleados' },
+  { title: 'Gestionar Inventario', img: stock, imgAlt: 'Inventario' },
 ];
+
 
 const AdminPage = () => {
   return (
-    <div className="min-h-screen bg-sky-50">
+    <div className="admin-page">
       {/* Header */}
-      <header className="bg-sky-600 text-white py-4 shadow-md">
-        <h1 className="text-2xl text-center font-semibold">Panel de Administración</h1>
+      <header className="admin-header">
+        <img src={logo} alt="Asadero Familiar Logo" className="logo" />
+        <h1 className="admin-title">Panel de Administración</h1>
       </header>
 
-      {/* Contenedor principal */}
-      <main className="max-w-6xl mx-auto py-10 px-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {/* Contenedor de opciones */}
+      <main className="admin-container">
+        <div className="admin-grid">
           {adminOptions.map((option, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition"
-            >
-              {option.icon}
+            <div key={index} className="admin-card">
+              <div className="admin-img-placeholder">
+                <img src={option.img} alt={option.imgAlt} className="admin-img" />
+              </div>
               <button
-                onClick={option.onClick}
-                className="mt-4 bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-xl transition"
+                className="admin-btn"
+                onClick={() => alert(`Ir a ${option.title.toLowerCase()}`)}
               >
                 {option.title}
               </button>
