@@ -3,33 +3,44 @@ import '../Styles/Login.css';
 import logo from '../Assets/logo.png';
 function Login() {
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const email = e.target.user.value;
-    const password = e.target.password.value;
+  const email = e.target.user.value;
+  const password = e.target.password.value;
 
-    try {
-      const response = await fetch('http://localhost:3001/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const response = await fetch('http://localhost:3001/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      const userRole = data.user.role;  
 
-      console.log('BBody',response.body);
-      console.log('Response:', response);
-
-      if (response.ok) {
-        // Redirigir a otra página si el login fue exitoso
-        window.location.href = '/admin'; // o la ruta que corresponda
-      } else {
-        alert('Credenciales incorrectas');
+      switch (userRole) {
+        case 'Administrador':
+          window.location.href = '/admin';  
+          break;
+        case 'Supervisor':
+          window.location.href = '/supervisor';  
+          break;
+        case 'Empleado':
+          window.location.href = '/employee'; 
+          break;
+        default:
+          alert('Rol no reconocido');
+          break;
       }
-    } catch (error) {
-      console.error('Error en login:', error);
+    } else {
+      alert('Credenciales incorrectas');
     }
-  };
+  } catch (error) {
+    console.error('Error en login:', error);
+  }
+};
 
   return (
     <div className="login-page animate-bg">
