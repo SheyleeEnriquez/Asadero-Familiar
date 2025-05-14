@@ -1,0 +1,190 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+
+body {
+  background-color: #f4f6f8;
+  font-family: 'Montserrat', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.login-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 30px 20px;
+  background: linear-gradient(to top, #d1b591, #e8d9abad);
+  transition: background 20s ease;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  border: 1px solid #dcdcdc;
+}
+
+.login-container h2 {
+  font-size: 26px;
+  color: #1a0c0b;
+  font-weight: 600;
+  margin-bottom: 25px;
+}
+
+.login-form input {
+  display: block;
+  width: 92%;
+  margin: 14px auto;
+  padding: 12px 14px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fefefe;
+  transition: border 0.3s ease;
+}
+
+.login-form input:focus {
+  border-color: #571d40;
+  outline: none;
+}
+
+.login-form button {
+  margin-top: 22px;
+  padding: 13px;
+  width: 95%;
+  background-color: #5c4229; /* azul formal */
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login-form button:hover {
+  background-color: #2c2616;
+}
+
+.login-container .brand-name {
+  font-size: 18px;
+  font-weight: 500;
+  color: #a67c00; /* dorado sobrio */
+  margin-top: 5px;
+  letter-spacing: 1px;
+}
+.login-header {
+  background-color: #421905;
+  width: 100%;
+  padding: 35px 0;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-header h1 {
+  color: #ffffff; /* dorado elegante */
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.login-page.animate-bg {
+  min-height: 100vh; 
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background-color: #ffffff;
+  align-items: center;
+}
+
+.login-page.animate-bg::before,
+.login-page.animate-bg::after {
+  content: '';
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 20%, transparent 60%);
+  opacity: 1;
+  z-index: 0;
+}
+
+.login-page.animate-bg::after {
+  animation-delay: 50s;
+}
+
+@keyframes floatBubbles {
+  0% {
+    transform: translateY(100%) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-100%) rotate(360deg);
+  }
+}
+
+.login-header,
+.login-container {
+  position: relative;
+  z-index: 1;
+}
+
+.bienvenido {
+  font-size: 32px;
+  font-weight: bold;
+  color: #ffffff;
+  animation: fadeIn 1.2s ease-in-out;
+  z-index: 1;
+  position: relative;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-form input {
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-form input:focus {
+  box-shadow: 0 0 5px rgba(29, 53, 87, 0.4);
+}
+.login-form label {
+  display: block;
+  text-align: left;
+  margin: 12px 0 4px 10px; 
+  font-weight: 500;
+  color: #000000;
+}
+
+.login-logo-container {
+  display: flex;
+  flex-direction: column;    /* Los elementos van uno encima del otro */
+  align-items: center;       /* Centra horizontalmente */
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.login-logo-container img {
+  width: 150px;
+  margin-bottom: -10px;
+}
+
+.logo {
+  position: absolute;
+  top: 50%;
+  left: 20px;
+  transform: translateY(-50%);
+  width: 90px;
+  height: auto;
+}
+
+.header-title {
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin: 0;
+}
