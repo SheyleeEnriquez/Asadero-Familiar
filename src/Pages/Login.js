@@ -5,7 +5,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const user = e.target.user.value;
+    const email = e.target.user.value;
     const password = e.target.password.value;
 
     try {
@@ -14,12 +14,15 @@ function Login() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ user, password }),
+        body: JSON.stringify({ email, password }),
       });
+
+      console.log('BBody',response.body);
+      console.log('Response:', response);
 
       if (response.ok) {
         // Redirigir a otra página si el login fue exitoso
-        window.location.href = '/dashboard'; // o la ruta que corresponda
+        window.location.href = '/admin'; // o la ruta que corresponda
       } else {
         alert('Credenciales incorrectas');
       }
