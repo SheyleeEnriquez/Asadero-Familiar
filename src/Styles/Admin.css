@@ -1,10 +1,10 @@
 .admin-page {
   min-height: 100vh;
-  background-color: #e0f2fe; /* sky-50 */
+  background-color: #f5f5dc; /* beige */
 }
 
 .admin-header {
-  background-color: #0284c7; /* sky-600 */
+  background-color: #8b5e3c; /* marrón medio */
   color: white;
   padding: 1rem;
   text-align: center;
@@ -25,6 +25,24 @@
   font-weight: 600;
 }
 
+.logout-btn {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #d4a373; /* beige más oscuro */
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #7b4b28; /* marrón oscuro */
+}
+
 .admin-container {
   max-width: 1000px;
   margin: 0 auto;
@@ -39,7 +57,7 @@
 }
 
 .admin-card {
-  background-color: white;
+  background-color: #ffffff;
   padding: 1.5rem;
   border-radius: 1rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -67,7 +85,7 @@
 }
 
 .admin-btn {
-  background-color: #0ea5e9; /* sky-500 */
+  background-color: #a97449; /* marrón claro */
   color: white;
   padding: 0.5rem 1.5rem;
   border: none;
@@ -77,5 +95,19 @@
 }
 
 .admin-btn:hover {
-  background-color: #0284c7; /* sky-600 */
+  background-color: #7b4b28; /* marrón oscuro */
+}
+.admin-card {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.admin-card:hover {
+  transform: translateY(-5px) scale(1.03);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }

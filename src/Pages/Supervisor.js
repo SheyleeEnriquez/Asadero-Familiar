@@ -1,4 +1,3 @@
-import React from 'react';
 import '../Styles/Supervisor.css';
 import logo from '../Assets/logo.png';
 import empleado from '../Assets/empleado.png';
@@ -12,13 +11,11 @@ const supervisorOptions = [
 const SupervisorPage = () => {
   return (
     <div className="supervisor-page">
-      {/* Header */}
       <header className="supervisor-header">
         <img src={logo} alt="Asadero Familiar Logo" className="logo" />
         <h1 className="supervisor-title">Panel del Supervisor</h1>
       </header>
 
-      {/* Contenedor principal */}
       <main className="supervisor-container">
         <div className="supervisor-grid">
           {supervisorOptions.map((option, index) => (

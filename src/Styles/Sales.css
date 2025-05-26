@@ -1,0 +1,56 @@
+.registro-ventas-container {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  background: #f3faff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #cce7ff;
+  font-family: Arial, sans-serif;
+}
+
+.registro-ventas-container h2 {
+  text-align: center;
+  color: #007acc;
+}
+
+.producto-item {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.producto-item input[type="text"],
+.producto-item input[type="number"],
+input[type="text"],
+select {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+button {
+  padding: 8px 12px;
+  background-color: #007acc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #005fa3;
+}
+
+.btn-registrar {
+  width: 100%;
+}
+
+.comprobante {
+  background: #dff0d8;
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #a5d6a7;
+}

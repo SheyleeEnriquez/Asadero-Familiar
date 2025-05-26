@@ -3,13 +3,16 @@ import '../Styles/Employee.css';
 import logo from '../Assets/logo.png';
 import stock from '../Assets/stock.png';
 import ventas from '../Assets/ventas.png';
+import { useNavigate } from 'react-router-dom';
+ 
 
 const employeeOptions = [
-  { title: 'Registrar Venta', img: stock, imgAlt: 'ventas'},
+  { title: 'Registrar Venta', img: stock, imgAlt: 'ventas',  path: '/Sales'},
   { title: 'Registrar Stock', img: ventas, imgAlt: 'stock' },
 ];
-
 const EmployeePage = () => {
+  const navigate = useNavigate(); // <-- Hook para navegar
+
   return (
     <div className="employee-page">
       {/* Header */}
@@ -28,7 +31,13 @@ const EmployeePage = () => {
               </div>
               <button
                 className="employee-btn"
-                onClick={() => alert(`Ir a ${option.title.toLowerCase()}`)}
+                onClick={() => {
+                  if (option.path) {
+                    navigate(option.path); // 🔁 Redirección
+                  } else {
+                    alert(`${option.title} aún no está disponible`);
+                  }
+                }}
               >
                 {option.title}
               </button>
@@ -39,5 +48,4 @@ const EmployeePage = () => {
     </div>
   );
 };
-
 export default EmployeePage;
