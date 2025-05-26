@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../Styles/ModCustomer.css';
 
-const initialForm = { id: '', name: '', email: '' };
+const initialForm = { id: '', name: '', idCard: '', address: '', phone: '', email: '' };
 
 const CustomerCRUD = () => {
   const [customers, setCustomers] = useState([]);
@@ -50,9 +50,33 @@ const CustomerCRUD = () => {
           required
         />
         <input
+          type="text"
+          name="idCard"
+          placeholder="Cédula"
+          value={form.idCard}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="address"
+          placeholder="Dirección"
+          value={form.address}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="tel"
+          name="phone"
+          placeholder="Teléfono"
+          value={form.phone}
+          onChange={handleChange}
+          required
+        />
+        <input
           type="email"
           name="email"
-          placeholder="Correo"
+          placeholder="Correo Electrónico"
           value={form.email}
           onChange={handleChange}
           required
@@ -66,7 +90,10 @@ const CustomerCRUD = () => {
         <thead>
           <tr>
             <th>Nombre</th>
-            <th>Correo</th>
+            <th>Cédula</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Correo Electrónico</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -74,6 +101,9 @@ const CustomerCRUD = () => {
           {customers.map((c) => (
             <tr key={c.id}>
               <td>{c.name}</td>
+              <td>{c.idCard}</td>
+              <td>{c.address}</td>
+              <td>{c.phone}</td>
               <td>{c.email}</td>
               <td>
                 <button onClick={() => handleEdit(c)} className="btn-edit">Editar</button>

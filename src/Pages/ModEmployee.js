@@ -1,7 +1,17 @@
 import React, { useState } from 'react';
 import '../Styles/ModEmployee.css';
 
-const initialForm = { id: '', name: '', email: '', role: '' };
+const initialForm = { 
+  id: '', 
+  fullName: '', 
+  idCard: '', 
+  address: '', 
+  phone: '', 
+  email: '', 
+  position: '', 
+  systemRole: '', 
+  branch: '' 
+};
 
 const EmployeeCRUD = () => {
   const [employees, setEmployees] = useState([]);
@@ -43,25 +53,65 @@ const EmployeeCRUD = () => {
       <form onSubmit={handleSubmit} className="employee-form">
         <input
           type="text"
-          name="name"
-          placeholder="Nombre"
-          value={form.name}
+          name="fullName"
+          placeholder="Nombre Completo"
+          value={form.fullName}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="idCard"
+          placeholder="Identificación"
+          value={form.idCard}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="address"
+          placeholder="Dirección"
+          value={form.address}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="tel"
+          name="phone"
+          placeholder="Teléfono"
+          value={form.phone}
           onChange={handleChange}
           required
         />
         <input
           type="email"
           name="email"
-          placeholder="Correo"
+          placeholder="Correo Electrónico"
           value={form.email}
           onChange={handleChange}
           required
         />
         <input
           type="text"
-          name="role"
+          name="position"
           placeholder="Cargo"
-          value={form.role}
+          value={form.position}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="systemRole"
+          placeholder="Rol en el Sistema"
+          value={form.systemRole}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="branch"
+          placeholder="Sucursal Asignada"
+          value={form.branch}
           onChange={handleChange}
           required
         />
@@ -73,18 +123,28 @@ const EmployeeCRUD = () => {
       <table className="employee-table">
         <thead>
           <tr>
-            <th>Nombre</th>
-            <th>Correo</th>
+            <th>Nombre Completo</th>
+            <th>Identificación</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Correo Electrónico</th>
             <th>Cargo</th>
+            <th>Rol en el Sistema</th>
+            <th>Sucursal Asignada</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           {employees.map((emp) => (
             <tr key={emp.id}>
-              <td>{emp.name}</td>
+              <td>{emp.fullName}</td>
+              <td>{emp.idCard}</td>
+              <td>{emp.address}</td>
+              <td>{emp.phone}</td>
               <td>{emp.email}</td>
-              <td>{emp.role}</td>
+              <td>{emp.position}</td>
+              <td>{emp.systemRole}</td>
+              <td>{emp.branch}</td>
               <td>
                 <button onClick={() => handleEdit(emp)} className="btn-edit">Editar</button>
                 <button onClick={() => handleDelete(emp.id)} className="btn-delete">Eliminar</button>
