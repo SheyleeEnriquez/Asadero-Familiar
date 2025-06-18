@@ -1,27 +1,23 @@
-import React from 'react';
 import '../Styles/Employee.css';
 import logo from '../Assets/logo.png';
 import stock from '../Assets/stock.png';
 import ventas from '../Assets/ventas.png';
 import { useNavigate } from 'react-router-dom';
  
-
 const employeeOptions = [
   { title: 'Registrar Venta', img: stock, imgAlt: 'ventas',  path: '/Sales'},
   { title: 'Registrar Stock', img: ventas, imgAlt: 'stock' },
 ];
 const EmployeePage = () => {
-  const navigate = useNavigate(); // <-- Hook para navegar
+  const navigate = useNavigate(); 
 
   return (
     <div className="employee-page">
-      {/* Header */}
       <header className="employee-header">
         <img src={logo} alt="Asadero Familiar Logo" className="logo" />
         <h1 className="employee-title">Panel del Empleado</h1>
       </header>
 
-      {/* Contenedor principal */}
       <main className="employee-container">
         <div className="employee-grid">
           {employeeOptions.map((option, index) => (
@@ -33,7 +29,7 @@ const EmployeePage = () => {
                 className="employee-btn"
                 onClick={() => {
                   if (option.path) {
-                    navigate(option.path); // 🔁 Redirección
+                    navigate(option.path); 
                   } else {
                     alert(`${option.title} aún no está disponible`);
                   }

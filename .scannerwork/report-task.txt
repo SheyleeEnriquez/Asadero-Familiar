@@ -1,0 +1,6 @@
+projectKey=SWDAF-Front2
+serverUrl=http://localhost:9000
+serverVersion=25.1.0.102122
+dashboardUrl=http://localhost:9000/dashboard?id=SWDAF-Front2
+ceTaskId=7352b16b-f040-488f-a86e-616afc16bbba
+ceTaskUrl=http://localhost:9000/api/ce/task?id=7352b16b-f040-488f-a86e-616afc16bbba

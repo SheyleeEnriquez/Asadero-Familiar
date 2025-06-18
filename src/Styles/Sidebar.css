@@ -1,0 +1,202 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background-color: #ca988550;
+  width: 350px;
+}
+
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0 1rem 0;
+  border-bottom: 2px solid #f1f3f4;
+}
+
+.logo-wrapper img {
+  height: 120px;
+}
+
+.logout-button {
+  margin: 1rem auto 0 auto;
+  padding: 0.75rem 1.5rem;
+  margin-bottom: 30px;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, #ff3535, #d21e1e);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #ff6b35 0%, #d2691e 100%);
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 1rem 0;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.sidebar li {
+  margin: 0.5rem 1rem;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  font-weight: 500;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid transparent;
+}
+
+.sidebar li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 70%;
+  background: linear-gradient(135deg, #ff6b35, #d2691e);
+  border-radius: 0 4px 4px 0;
+  transition: width 0.3s ease;
+}
+
+.sidebar li:hover {
+  background: rgba(201, 158, 116, 0.1);
+  color: #2c3e50;
+  transform: translateX(8px);
+  border-color: rgba(255, 107, 53, 0.2);
+  box-shadow: 0 4px 15px rgba(230, 127, 89, 0.15);
+}
+
+.sidebar li:hover::before {
+  width: 4px;
+}
+
+.sidebar li.active {
+  background: linear-gradient(135deg, #c96a1726, rgba(239, 209, 179, 0.347));
+  color: #2c3e50;
+  font-weight: 600;
+  border-color: rgba(255, 107, 53, 0.3);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.2);
+  transform: translateX(12px);
+}
+
+.sidebar li.active::before {
+  width: 4px;
+}
+
+.sidebar li.active::after {
+  content: '';
+  position: absolute;
+  right: 1rem;
+  width: 8px;
+  height: 8px;
+  background: #ff6b35;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.3);
+}
+
+/* Iconos para cada item del menú */
+.sidebar li:nth-child(1)::after {
+  content: '📊';
+  font-size: 1.2rem;
+  position: absolute;
+  left: 1.5rem;
+}
+
+.sidebar li:nth-child(2)::after {
+  content: '👥';
+  font-size: 1.2rem;
+  position: absolute;
+  left: 1.5rem;
+}
+
+.sidebar li:nth-child(3)::after {
+  content: '🤝';
+  font-size: 1.2rem;
+  position: absolute;
+  left: 1.5rem;
+}
+
+.sidebar li:nth-child(4)::after {
+  content: '📦';
+  font-size: 1.2rem;
+  position: absolute;
+  left: 1.5rem;
+}
+
+.sidebar li:nth-child(5)::after {
+  content: '📈';
+  font-size: 1.2rem;
+  position: absolute;
+  left: 1.5rem;
+}
+
+/* Ajustar el padding para hacer espacio a los iconos */
+.sidebar li {
+  padding-left: 4rem;
+}
+
+/* Efecto de pulso para el item activo */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.2);
+  }
+  50% {
+    box-shadow: 0 6px 25px rgba(255, 107, 53, 0.3);
+  }
+  100% {
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.2);
+  }
+}
+
+.sidebar li.active {
+  animation: pulse 2s infinite;
+}
+
+/* Hover effects suaves */
+.sidebar li:active {
+  transform: translateX(6px) scale(0.98);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sidebar ul {
+    display: flex;
+    overflow-x: auto;
+    padding: 0.5rem;
+  }
+  
+  .sidebar li {
+    min-width: 150px;
+    margin: 0 0.25rem;
+    text-align: center;
+    white-space: nowrap;
+  }
+  
+  .sidebar li:hover,
+  .sidebar li.active {
+    transform: translateY(-4px);
+  }
+}
