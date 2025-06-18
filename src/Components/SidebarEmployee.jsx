@@ -1,29 +1,46 @@
-import React, { useState } from 'react'; // Asegúrate de importar useState
-import Sidebar from '../Components/SidebarEmployee'; // Importa tu componente Sidebar
-import RegisterSale from '../Pages/Sales'; // Importa el componente RegisterSale
-import RegisterStock from '../Pages/Stock'; // Importa el componente RegisterStock
-import '../Styles/SidebarEmployee.css'; // Estilos CSS
+import React from 'react';
+import '../Styles/SidebarEmployee.css';
+import logo from '../Assets/logo.png';  // Importa el logo
 
-const EmployeeDashboardCustom = () => {
-  const [activeComponent, setActiveComponent] = useState('venta');
+const SidebarEmployee = ({ onSelect, activeItem, menuItems, className }) => {
+  // Iconos para cada tipo de menú
+  const getIcon = (id) => {
+    switch (id) {
+      case 'venta':
+        return '🛒';
+      case 'stock':
+        return '📦';
+      default:
+        return '📋';
+    }
+  };
 
   return (
-    <div className="employee-dashboard">
-      <Sidebar
-        className="sidebar-custom" // Nueva clase
-        onSelect={setActiveComponent}
-        activeItem={activeComponent}
-        menuItems={[
-          { id: 'venta', label: 'Registrar Venta' },
-          { id: 'stock', label: 'Registrar Stock' },
-        ]}
-      />
-      <div className="dashboard-content">
-        {activeComponent === 'venta' && <RegisterSale />}
-        {activeComponent === 'stock' && <RegisterStock />}
+    <div className={`sidebar-employee ${className || ''}`}>
+      <div className="sidebar-header-emp">
+        {/* Logo */}
+        <div className="logo-wrapper-emp">
+          <img src={logo} alt="Logo" />
+        </div>
+        <h3>Panel Empleado</h3>
       </div>
+      <nav className="sidebar-nav-emp">
+        <ul>
+          {menuItems.map((item) => (
+            <li key={item.id}>
+              <button
+                className={`sidebar-item-emp ${activeItem === item.id ? 'active' : ''}`}
+                onClick={() => onSelect(item.id)}
+              >
+                <span className="sidebar-icon-emp">{getIcon(item.id)}</span>
+                {item.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </div>
   );
 };
 
-export default EmployeeDashboardCustom;
+export default SidebarEmployee;

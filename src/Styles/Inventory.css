@@ -1,3 +1,5 @@
+/* --- Estilos base (tu código original) --- */
+
 /* Contenedor principal */
 .inventory-crud {
   max-width: 900px;
@@ -23,6 +25,7 @@
   justify-content: center;
   gap: 1rem;
   margin-bottom: 2rem;
+  flex-wrap: wrap; /* para que se envuelvan en pantallas pequeñas */
 }
 
 .top-buttons button {
@@ -34,6 +37,9 @@
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.3s;
+  flex: 1 1 auto; /* que puedan crecer y encoger */
+  max-width: 180px; /* limite de ancho */
+  min-width: 120px; /* mínimo ancho para legibilidad */
 }
 
 .top-buttons button:hover {
@@ -46,10 +52,17 @@
   flex-direction: column;
   gap: 1.2rem;
   align-items: center;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: #f8fafc;
+  padding: 2rem;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
 .inventory-form input {
-  width: 80%;
+  width: 100%;
   padding: 0.75rem 1rem;
   border-radius: 10px;
   border: 1px solid #cbd5e1;
@@ -76,6 +89,9 @@
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  width: 100%;
+  max-width: 300px;
+  align-self: center;
 }
 
 .inventory-form button:hover {
@@ -91,14 +107,15 @@
 
 /* Tabla de productos */
 .table-wrapper {
-  overflow-x: auto;
+  overflow-x: auto; /* scroll horizontal si es necesario */
+  margin-top: 1rem;
 }
 
 .inventory-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1rem;
   font-size: 0.95rem;
+  min-width: 600px; /* para que la tabla sea scrollable si no cabe */
 }
 
 .inventory-table th,
@@ -140,6 +157,7 @@
   cursor: pointer;
   font-weight: 600;
   margin: 0 0.25rem;
+  font-size: 0.9rem;
 }
 
 .btn-edit {
@@ -178,52 +196,95 @@
   font-size: 1rem;
   color: #64748b;
 }
-.inventory-form {
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  background-color: #f8fafc;
-  padding: 2rem;
-  border-radius: 14px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-  align-items: center;
+
+/* --- Media Queries para responsividad --- */
+
+@media (max-width: 768px) {
+  .inventory-crud {
+    margin: 20px 1rem;
+    padding: 1.5rem;
+  }
+
+  .inventory-crud h2 {
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .top-buttons {
+    justify-content: space-around;
+  }
+
+  .top-buttons button {
+    max-width: 140px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .inventory-form {
+    padding: 1.5rem 1rem;
+    gap: 1rem;
+  }
+
+  .inventory-form input {
+    font-size: 0.95rem;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .inventory-form button {
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    max-width: 100%;
+  }
+
+  .inventory-table {
+    font-size: 0.85rem;
+    min-width: 500px;
+  }
+
+  .btn-edit,
+  .btn-delete {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
 }
 
-.inventory-form input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  border: 1px solid #cbd5e1;
-  font-size: 1rem;
-  transition: border 0.3s;
-}
+@media (max-width: 480px) {
+  .inventory-crud {
+    margin: 15px 0.5rem;
+    padding: 1rem;
+  }
 
-.inventory-form input:focus {
-  border-color: #3b82f6;
-  outline: none;
-}
+  .inventory-crud h2 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
 
-.inventory-form button {
-  padding: 0.875rem 2rem;
-  font-weight: 700;
-  font-size: 1.1rem;
-  border: none;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  border-radius: 14px;
-  cursor: pointer;
-  box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+  .top-buttons {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
 
-.inventory-form button:hover {
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  box-shadow: 0 10px 20px rgba(5, 150, 105, 0.6);
-  transform: translateY(-3px);
-}
+  .top-buttons button {
+    max-width: 100%;
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
 
+  .inventory-form {
+    padding: 1rem;
+  }
+
+  .inventory-form input {
+    font-size: 0.9rem;
+  }
+
+  .inventory-form button {
+    font-size: 0.95rem;
+    padding: 0.7rem 1rem;
+  }
+
+  .inventory-table {
+    min-width: 400px;
+  }
+}

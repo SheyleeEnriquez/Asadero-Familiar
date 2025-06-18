@@ -1,28 +1,44 @@
-import React, { useState } from 'react';
-import Sidebar from '../Components/SidebarEmployee';
+import React, { useState, useEffect } from 'react';
+import SidebarEmployee from './SidebarEmployee';
 import RegisterSale from '../Pages/Sales';
 import RegisterStock from '../Pages/Stock';
-import '../Styles/EmployeesDashboard.css';
+import '../Styles/SidebarEmployee.css';
+import '../Styles/AdminDashboard.css';
 
-const EmployeeDashboard = () => {
-  const [activeComponent, setActiveComponent] = useState('venta'); // Página inicial: Registrar Venta
+const EmployeeDashboardCustom = () => {
+  const [activeComponent, setActiveComponent] = useState('venta');
+
+  useEffect(() => {
+    console.log('Componente activo:', activeComponent);
+  }, [activeComponent]);
+
+  const renderContent = () => {
+    switch(activeComponent) {
+      case 'venta':
+        return <RegisterSale />;
+      case 'stock':
+        return <RegisterStock />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="employee-dashboard">
-      <Sidebar 
-        onSelect={setActiveComponent} 
-        activeItem={activeComponent} 
+      <SidebarEmployee
+        className="sidebar-custom"
+        onSelect={setActiveComponent}
+        activeItem={activeComponent}
         menuItems={[
           { id: 'venta', label: 'Registrar Venta' },
-          { id: 'stock', label: 'Registrar Stock' }
+          { id: 'stock', label: 'Registrar Stock' },
         ]}
       />
-      <div className="dashboard-content">
-        {activeComponent === 'venta' && <RegisterSale />}
-        {activeComponent === 'stock' && <RegisterStock />}
+      <div className="dashboard-content-emp">
+        {renderContent()}
       </div>
     </div>
   );
 };
 
-export default EmployeeDashboard;
+export default EmployeeDashboardCustom;

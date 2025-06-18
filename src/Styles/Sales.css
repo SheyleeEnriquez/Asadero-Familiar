@@ -1,56 +1,199 @@
 .registro-ventas-container {
-  max-width: 600px;
-  margin: auto;
-  padding: 20px;
-  background: #f3faff;
-  border-radius: 10px;
-  box-shadow: 0 0 10px #cce7ff;
-  font-family: Arial, sans-serif;
+  max-width: 900px; /* Más ancho para pantallas grandes */
+  width: 90%; /* Ocupa 90% del ancho en pantallas pequeñas */
+  margin: 40px auto;
+  padding: 40px 35px;
+  background: #ffffff; /* Fondo blanco */
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #111111; /* Letras negras */
+  transition: box-shadow 0.3s ease;
+  box-sizing: border-box;
+}
+
+.registro-ventas-container:hover {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15);
 }
 
 .registro-ventas-container h2 {
   text-align: center;
-  color: #007acc;
+  color: #111111; /* Letras negras */
+  font-weight: 700;
+  font-size: 2.4rem; /* Más grande */
+  margin-bottom: 35px;
+  letter-spacing: 0.03em;
 }
 
 .producto-item {
   display: flex;
+  align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
+  flex-wrap: nowrap; /* Asegura que los elementos no se desplacen */
 }
 
-.producto-item input[type="text"],
-.producto-item input[type="number"],
-input[type="text"],
-select {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+.producto-item select,
+.producto-item input[type="number"] {
+  flex: 1; /* Ajusta el espacio disponible */
+  padding: 16px 20px;
+  border: 2px solid #444444; /* Gris oscuro */
+  border-radius: 10px;
+  font-size: 1.2rem;
+  color: #111111; /* Letras negras */
+  background-color: #f9f9f9;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
+  min-width: 100px; /* Evita que sean demasiado pequeños */
+}
+
+.producto-item select:focus,
+.producto-item input[type="number"]:focus {
+  border-color: #444444; /* Gris oscuro */
+  outline: none;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  background-color: #ffffff;
+}
+
+.producto-item button {
+  background-color: #ef4444; /* Rojo */
+  color: #ffffff;
+  border: none;
+  border-radius: 50%; /* Botón circular */
+  width: 32px; /* Tamaño fijo */
+  height: 32px; /* Tamaño fijo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem; /* Tamaño del texto */
+  cursor: pointer;
+  margin-left: auto; /* Mueve el botón al extremo derecho */
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-bottom: 30px; /* Espacio a la derecha */
+}
+
+.producto-item button:hover {
+  background-color: #dc2626; /* Rojo más oscuro */
+  transform: scale(1.1); /* Pequeña animación */
+}
+
+.producto-item button:disabled {
+  background-color: #f87171; /* Rojo claro */
+  cursor: not-allowed;
+  transform: none; /* Sin animación */
 }
 
 button {
-  padding: 8px 12px;
-  background-color: #007acc;
-  color: white;
+  padding: 18px 26px;
+  background-color: #f4a261; /* Naranja pastel */
+  color: #111111; /* Letras negras */
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
-  margin-top: 10px;
+  margin-top: 25px;
+  font-weight: 700;
+  font-size: 1.3rem;
+  width: 100%;
+  letter-spacing: 0.02em;
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
 }
 
 button:hover {
-  background-color: #005fa3;
-}
-
-.btn-registrar {
-  width: 100%;
+  background-color: #e89451; /* Naranja pastel más oscuro */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .comprobante {
-  background: #dff0d8;
-  margin-top: 20px;
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #a5d6a7;
+  background: #f0f0f0; /* Gris muy claro */
+  margin-top: 35px;
+  padding: 30px 35px;
+  border-radius: 14px;
+  border: 1px solid #ccc;
+  color: #111111; /* Letras negras */
+  font-weight: 600;
+  font-size: 1.2rem;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+.top-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.top-buttons button {
+  flex: 1 1 120px;
+  max-width: 180px;
+  padding: 14px 20px;
+  font-size: 1.1rem;
+  background-color: #f4a261; /* Naranja pastel */
+  color: #111111; /* Letras negras */
+  border-radius: 12px;
+  transition: background-color 0.3s ease;
+}
+
+.top-buttons button:hover {
+  background-color: #e89451; /* Naranja pastel más oscuro */
+}
+
+
+
+.top-buttons button.active {
+  background-color: #e89451; /* Naranja pastel más oscuro */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .registro-ventas-container {
+    padding: 30px 25px;
+  }
+
+  .registro-ventas-container h2 {
+    font-size: 2rem;
+  }
+
+  .producto-item {
+    gap: 15px;
+  }
+
+  .producto-item select,
+  .producto-item input[type="number"] {
+    font-size: 1rem;
+    padding: 14px 16px;
+  }
+
+  button {
+    font-size: 1.1rem;
+    padding: 16px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .registro-ventas-container {
+    padding: 20px 15px;
+    width: 95%;
+  }
+
+  .registro-ventas-container h2 {
+    font-size: 1.7rem;
+  }
+
+  .producto-item {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .top-buttons {
+    flex-direction: column;
+  }
+
+  .top-buttons button {
+    max-width: 100%;
+  }
 }
