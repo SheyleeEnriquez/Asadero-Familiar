@@ -1,9 +1,8 @@
 import React from 'react';
 import '../Styles/SidebarEmployee.css';
-import logo from '../Assets/logo.png';  // Importa el logo
+import logo from '../Assets/logo.png';
 
 const SidebarEmployee = ({ onSelect, activeItem, menuItems, className }) => {
-  // Iconos para cada tipo de menú
   const getIcon = (id) => {
     switch (id) {
       case 'venta':
@@ -15,15 +14,19 @@ const SidebarEmployee = ({ onSelect, activeItem, menuItems, className }) => {
     }
   };
 
+  const handleLogout = () => {
+    window.location.href = '/'; // Redirige a la página principal
+  };
+
   return (
     <div className={`sidebar-employee ${className || ''}`}>
       <div className="sidebar-header-emp">
-        {/* Logo */}
         <div className="logo-wrapper-emp">
           <img src={logo} alt="Logo" />
         </div>
         <h3>Panel Empleado</h3>
       </div>
+
       <nav className="sidebar-nav-emp">
         <ul>
           {menuItems.map((item) => (
@@ -39,6 +42,12 @@ const SidebarEmployee = ({ onSelect, activeItem, menuItems, className }) => {
           ))}
         </ul>
       </nav>
+
+      <div className="logout-container-emp">
+        <button className="logout-button-emp" onClick={handleLogout}>
+          Cerrar Sesión
+        </button>
+      </div>
     </div>
   );
 };

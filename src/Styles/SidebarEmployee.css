@@ -44,6 +44,27 @@
   padding: 0 15px;
 }
 
+.logout-container-emp {
+  margin-top: auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+.logout-button-emp {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.logout-button-emp:hover {
+  background-color: #c0392b;
+}
+
 .sidebar-item-emp {
   width: 100%;
   padding: 18px 20px;
