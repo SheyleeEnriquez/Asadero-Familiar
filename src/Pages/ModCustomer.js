@@ -6,9 +6,9 @@ const initialForm = {
   id: '',
   names: '',
   lastnames: '',
-  idCard: '',
+  documentNumber: '',
   address: '',
-  phone: '',
+  phoneNumber: '',
   email: ''
 };
 
@@ -19,13 +19,13 @@ const CustomerCRUD = () => {
   const [view, setView] = useState('form');
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const API_URL = 'http://localhost:3002/api/customers';
+  const API_URL = 'http://localhost:3020/api/customers';
 
   useEffect(() => {
     // Fetch inicial para obtener todos los clientes
     fetch(API_URL)
       .then((res) => res.json())
-      .then((data) => setCustomers(data))
+      .then((data) => setCustomers(data.customers))
       .catch((err) => console.error('Error al cargar los clientes:', err));
   }, []);
 
@@ -103,7 +103,7 @@ const CustomerCRUD = () => {
             type="text"
             name="idCard"
             placeholder="Cédula"
-            value={form.idCard}
+            value={form.documentNumber}
             onChange={handleChange}
             required
           />
@@ -119,7 +119,7 @@ const CustomerCRUD = () => {
             type="tel"
             name="phone"
             placeholder="Teléfono"
-            value={form.phone}
+            value={form.phoneNumber}
             onChange={handleChange}
           />
           <input
@@ -156,9 +156,9 @@ const CustomerCRUD = () => {
                   <tr key={c.id}>
                     <td>{c.names}</td>
                     <td>{c.lastnames}</td>
-                    <td>{c.idCard}</td>
+                    <td>{c.documentNumber}</td>
                     <td>{c.address}</td>
-                    <td>{c.phone}</td>
+                    <td>{c.phoneNumber}</td>
                     <td>{c.email}</td>
                     <td>
                       <button onClick={() => handleEdit(c)} className="btn-edit">Editar</button>

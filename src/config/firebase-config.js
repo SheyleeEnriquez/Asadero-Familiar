@@ -1,15 +1,17 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import dotenv from 'dotenv';
+dotenv.config();
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDIgli96xxywrmMq1FNLO-OfTwLvocwdSM",
-  authDomain: "asaderofamiliar-authservice.firebaseapp.com",
-  projectId: "asaderofamiliar-authservice",
-  storageBucket: "asaderofamiliar-authservice.firebasestorage.app",
-  messagingSenderId: "883902898937",
-  appId: "1:883902898937:web:88b8821eb414c66214b828",
-  measurementId: "G-J5MGS9WNTB"
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MESUREMENT_ID
 };
 
 // Initialize Firebase

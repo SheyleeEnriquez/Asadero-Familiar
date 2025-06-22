@@ -9,7 +9,7 @@ function Login() {
 
   const email = e.target.user.value;
   const password = e.target.password.value;
-
+    console.log('Email:', email);
   signInWithEmailAndPassword(auth, email, password)
   .then(async (userCredential) => {
     //Get the signed-in user
@@ -21,9 +21,9 @@ function Login() {
     }
 
     // Check if the user is verified
-    if (!user.emailVerified) {
-      throw new Error('Por favor, verifica tu correo electrónico antes de iniciar sesión.');
-    }
+    //if (!user.emailVerified) {
+      //throw new Error('Por favor, verifica tu correo electrónico antes de iniciar sesión.');
+    //}
 
     // Get the ID token with claims
     const idTokenResult = await user.getIdTokenResult();
