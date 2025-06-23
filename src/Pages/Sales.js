@@ -3,42 +3,50 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../Styles/Sales.css';
 
-const PRODUCTOS_DISPONIBLES = [
-  { nombre: 'Salchipapa', precio: 1.25 },
-  { nombre: 'Papipollo', precio: 1.75 },
-  { nombre: 'Broster', precio: 1.75 },
-  { nombre: 'Pollo entero vacío', precio: 10.00 },
-  { nombre: 'Medio pollo vacío', precio: 5.00 },
-  { nombre: 'Pollo entero completo (arroz, papas, consomé)', precio: 12.00 },
-  { nombre: 'Medio pollo completo (arroz, papas, consomé)', precio: 7.00 },
-  { nombre: 'Cuarto de pollo', precio: 4.00 },
-  { nombre: 'Octavo de pollo', precio: 3.00 },
-  { nombre: 'Almuerzo', precio: 2.5 },
-  { nombre: 'Porción de papas', precio: 1.00 },
-  { nombre: 'Porción de arroz', precio: 1.00 },
-  { nombre: 'Salchipapa estudiantil', precio: 0.5 },
-];
-
 const RegistroVentas = () => {
-  const [productosForm, setProductosForm] = useState([{ nombre: '', cantidad: 1 }]);
+  const [productosForm, setProductosForm] = useState([{ productId: '', quantity: 1 }]);
   const [cliente, setCliente] = useState('');
   const [clientes, setClientes] = useState([]);
   const [metodoPago, setMetodoPago] = useState('');
   const [ventasRegistradas, setVentasRegistradas] = useState([]);
   const [vista, setVista] = useState('agregar');
+  const [productosDisponibles, setProductosDisponibles] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchClientes = async () => {
       try {
-        const response = await axios.get('http://localhost:3002/api/customers');
+        const response = await axios.get('http://localhost:3020/api/customers');
         setClientes(response.data || []);
       } catch (error) {
         console.error('Error al obtener los clientes:', error);
         setClientes([]);
       }
     };
+
+    const fetchProductos = async () => {
+      try {
+        const response = await axios.get('http://localhost:3030/api/products');
+        setProductosDisponibles(response.data.products);
+      } catch (error) {
+        console.error('Error al obtener productos:', error);
+        setProductosDisponibles([]);
+      }
+    };
+
+    const fetchOrdenes = async () => {
+      try {
+        const response = await axios.get('http://localhost:3030/api/orders');
+        setVentasRegistradas(response.data.orders);
+      } catch (error) {
+        console.error('Error al obtener órdenes:', error);
+        setVentasRegistradas([]);
+      }
+    };
+
     fetchClientes();
+    fetchProductos();
+    fetchOrdenes();
   }, []);
 
   const handleProductoChange = (index, field, value) => {
@@ -53,7 +61,7 @@ const RegistroVentas = () => {
   };
 
   const agregarProductoForm = () => {
-    setProductosForm([...productosForm, { nombre: '', cantidad: 1 }]);
+    setProductosForm([...productosForm, { productId: '', quantity: 1 }]);
   };
 
   const eliminarProductoForm = (index) => {
@@ -62,37 +70,39 @@ const RegistroVentas = () => {
   };
 
   const calcularTotalForm = () => {
-    return productosForm.reduce((total, producto) => {
-      const prod = PRODUCTOS_DISPONIBLES.find(p => p.nombre === producto.nombre);
+    return productosForm.reduce((total, item) => {
+      const prod = productosDisponibles.find(p => p.id === item.productId);
       if (prod) {
-        return total + (producto.cantidad * prod.precio);
+        return total + item.quantity * parseFloat(prod.price);
       }
       return total;
     }, 0).toFixed(2);
   };
 
-  const registrarVenta = () => {
-    const productosValidos = productosForm.every(p => p.nombre.trim() !== '' && p.cantidad > 0);
+  const registrarVenta = async () => {
+    const productosValidos = productosForm.every(p => p.productId && p.quantity > 0);
     if (!productosValidos) {
       alert('Seleccione un producto válido y cantidad mayor a 0.');
       return;
     }
 
-    const total = calcularTotalForm();
-    const datosVenta = {
-      id: Date.now(),
-      productos: productosForm,
-      cliente: cliente.trim() || 'Consumidor final',
-      metodoPago,
-      total,
-      fecha: new Date().toLocaleString()
+    const orderData = {
+      customerId: cliente.trim() || '2d399ebc-458f-43c9-b6a1-78b6e2bd10ef',
+      items: productosForm.map(p => ({ productId: p.productId, quantity: p.quantity }))
     };
 
-    setVentasRegistradas([...ventasRegistradas, datosVenta]);
-    setProductosForm([{ nombre: '', cantidad: 1 }]);
-    setCliente('');
-    setMetodoPago('');
-    setVista('ver');
+    try {
+      await axios.post('http://localhost:3030/api/orders', orderData);
+      alert('Venta registrada con éxito');
+      setProductosForm([{ productId: '', quantity: 1 }]);
+      setCliente('');
+      setMetodoPago('');
+      setVista('ver');
+      const response = await axios.get('http://localhost:3030/api/orders');
+      setVentasRegistradas(response.data.orders);
+    } catch (error) {
+      console.error('Error al registrar venta:', error);
+    }
   };
 
   return (
@@ -113,13 +123,13 @@ const RegistroVentas = () => {
           {productosForm.map((producto, index) => (
             <div key={index} className="producto-item">
               <select
-                value={producto.nombre}
-                onChange={(e) => handleProductoChange(index, 'nombre', e.target.value)}
+                value={producto.productId}
+                onChange={(e) => handleProductoChange(index, 'productId', e.target.value)}
               >
                 <option value="">Seleccione producto</option>
-                {PRODUCTOS_DISPONIBLES.map((p) => (
-                  <option key={p.nombre} value={p.nombre}>
-                    {p.nombre} (${p.precio.toFixed(2)})
+                {productosDisponibles.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} (${parseFloat(p.price).toFixed(2)})
                   </option>
                 ))}
               </select>
@@ -127,7 +137,7 @@ const RegistroVentas = () => {
               <input
                 type="number"
                 min="1"
-                value={producto.cantidad}
+                value={producto.quantity}
                 onChange={(e) => handleProductoChange(index, 'cantidad', e.target.value)}
               />
 
@@ -153,7 +163,7 @@ const RegistroVentas = () => {
               <>
                 <option value="">Seleccione cliente</option>
                 {clientes.map((c) => (
-                  <option key={c.id} value={c.nombre}>{c.nombre}</option>
+                  <option key={c.id} value={c.id}>{c.nombre}</option>
                 ))}
               </>
             ) : (
@@ -193,7 +203,6 @@ const RegistroVentas = () => {
                   <tr>
                     <th>ID</th>
                     <th>Cliente</th>
-                    <th>Método de Pago</th>
                     <th>Productos</th>
                     <th>Total</th>
                     <th>Fecha</th>
@@ -203,17 +212,16 @@ const RegistroVentas = () => {
                   {ventasRegistradas.map((venta) => (
                     <tr key={venta.id}>
                       <td>{venta.id}</td>
-                      <td>{venta.cliente}</td>
-                      <td>{venta.metodoPago || 'No especificado'}</td>
+                      <td>{venta.customerId}</td>
                       <td>
                         <ul>
-                          {venta.productos.map((p, i) => (
-                            <li key={i}>{p.nombre} x {p.cantidad}</li>
+                          {venta.orderDetails.map((p, i) => (
+                            <li key={i}>{p.product.name} x {p.quantity}</li>
                           ))}
                         </ul>
                       </td>
-                      <td>${venta.total}</td>
-                      <td>{venta.fecha}</td>
+                      <td>${parseFloat(venta.total).toFixed(2)}</td>
+                      <td>{new Date(venta.createdAt).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>

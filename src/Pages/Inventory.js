@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import '../Styles/Inventory.css';
+
+const API_BASE_URL = 'http://localhost:3040/api';
 
 const initialForm = {
   id: '',
-  productName: '',
-  currentStock: '',
+  name: '',
+  quantity: '',
   minThreshold: ''
 };
 
@@ -14,17 +17,134 @@ const Inventory = () => {
   const [editingId, setEditingId] = useState(null);
   const [view, setView] = useState('form');
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
+
+  // Cargar productos al montar el componente
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  // Función para obtener todos los productos
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setApiError('');
+      const response = await axios.get(`${API_BASE_URL}/inventory`);
+      
+      // El backend devuelve { inventory: [...], pagination: {...} }
+      if (response.data && Array.isArray(response.data.inventory)) {
+        setProducts(response.data.inventory);
+      } else {
+        console.error('La respuesta no tiene el formato esperado:', response.data);
+        setProducts([]);
+        setApiError('Error: La respuesta del servidor no tiene el formato esperado');
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setApiError('Error al cargar los productos: ' + (error.response?.data?.message || error.message));
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para crear un producto
+  const createProduct = async (productData) => {
+    try {
+      setLoading(true);
+      setApiError('');
+      const response = await axios.post(`${API_BASE_URL}/inventory`, productData);
+      
+      // Asegurar que products sea un array antes de agregar
+      const currentProducts = Array.isArray(products) ? products : [];
+      setProducts([...currentProducts, response.data]);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating product:', error);
+      setApiError('Error al crear el producto: ' + (error.response?.data?.message || error.message));
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para actualizar un producto
+  const updateProduct = async (id, productData) => {
+    try {
+      setLoading(true);
+      setApiError('');
+      const response = await axios.put(`${API_BASE_URL}/inventory/${id}`, productData);
+      
+      // Asegurar que products sea un array antes de mapear
+      const currentProducts = Array.isArray(products) ? products : [];
+      setProducts(currentProducts.map(p => p.id === id ? response.data : p));
+      return response.data;
+    } catch (error) {
+      console.error('Error updating product:', error);
+      setApiError('Error al actualizar el producto: ' + (error.response?.data?.message || error.message));
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para eliminar un producto
+  const deleteProduct = async (id) => {
+    try {
+      setLoading(true);
+      setApiError('');
+      await axios.delete(`${API_BASE_URL}/inventory/${id}`);
+      
+      // Asegurar que products sea un array antes de filtrar
+      const currentProducts = Array.isArray(products) ? products : [];
+      setProducts(currentProducts.filter(p => p.id !== id));
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      setApiError('Error al eliminar el producto: ' + (error.response?.data?.message || error.message));
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para obtener productos con stock bajo
+  const fetchLowStockProducts = async () => {
+    try {
+      setLoading(true);
+      setApiError('');
+      const response = await axios.get(`${API_BASE_URL}/low-stock`);
+      
+      // Asumir que low-stock también devuelve el mismo formato
+      if (response.data && Array.isArray(response.data.inventory)) {
+        setProducts(response.data.inventory);
+      } else if (Array.isArray(response.data)) {
+        // En caso de que low-stock devuelva directamente el array
+        setProducts(response.data);
+      } else {
+        console.error('La respuesta no tiene el formato esperado:', response.data);
+        setProducts([]);
+        setApiError('Error: La respuesta del servidor no tiene el formato esperado');
+      }
+    } catch (error) {
+      console.error('Error fetching low stock products:', error);
+      setApiError('Error al cargar productos con stock bajo: ' + (error.response?.data?.message || error.message));
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const validate = () => {
     const newErrors = {};
 
     // Solo letras y espacios
-    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(form.productName.trim())) {
-      newErrors.productName = 'El nombre solo debe contener letras y espacios';
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(form.name.trim())) {
+      newErrors.name = 'El nombre solo debe contener letras y espacios';
     }
 
-    if (form.currentStock < 0 || form.currentStock === '') {
-      newErrors.currentStock = 'El stock debe ser un número positivo';
+    if (form.quantity < 0 || form.quantity === '') {
+      newErrors.quantity = 'El stock debe ser un número positivo';
     }
 
     if (form.minThreshold < 0 || form.minThreshold === '') {
@@ -41,41 +161,88 @@ const Inventory = () => {
     setErrors({ ...errors, [name]: '' }); // Limpiar error al escribir
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validate()) return;
 
-    if (editingId !== null) {
-      setProducts(products.map(p => p.id === editingId ? form : p));
-      setEditingId(null);
-    } else {
-      setProducts([...products, { ...form, id: Date.now().toString() }]);
-    }
+    try {
+      const productData = {
+        name: form.name,
+        quantity: parseInt(form.quantity),
+        minThreshold: parseInt(form.minThreshold)
+      };
 
-    setForm(initialForm);
-    setErrors({});
+      if (editingId !== null) {
+        await updateProduct(editingId, productData);
+        setEditingId(null);
+      } else {
+        await createProduct(productData);
+      }
+
+      setForm(initialForm);
+      setErrors({});
+      setView('list'); // Cambiar a vista de lista después de guardar
+    } catch (error) {
+      // El error ya se maneja en las funciones de API
+    }
   };
 
   const handleEdit = (product) => {
-    setForm(product);
+    setForm({
+      id: product.id,
+      name: product.name,
+      quantity: product.quantity.toString(),
+      minThreshold: product.minThreshold.toString()
+    });
     setEditingId(product.id);
     setView('form');
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-      setProducts(products.filter(p => p.id !== id));
+      await deleteProduct(id);
     }
+  };
+
+  const handleShowLowStock = () => {
+    fetchLowStockProducts();
+    setView('list');
+  };
+
+  const handleShowAllProducts = () => {
+    fetchProducts();
+    setView('list');
   };
 
   return (
     <div className="inventory-crud">
       <h2>Gestión de Inventario</h2>
 
+      {/* Mostrar errores de API */}
+      {apiError && (
+        <div className="api-error" style={{ color: 'red', marginBottom: '10px', padding: '10px', border: '1px solid red', borderRadius: '4px' }}>
+          {apiError}
+        </div>
+      )}
+
+      {/* Indicador de carga */}
+      {loading && (
+        <div className="loading" style={{ textAlign: 'center', margin: '20px 0' }}>
+          Cargando...
+        </div>
+      )}
+
       <div className="top-buttons">
-        <button onClick={() => setView('form')}>Agregar Producto</button>
-        <button onClick={() => setView('list')}>Ver Inventario</button>
+        <button onClick={() => setView('form')} disabled={loading}>
+          Agregar Producto
+        </button>
+        <button onClick={handleShowAllProducts} disabled={loading}>
+          Ver Inventario
+        </button>
+        <button onClick={handleShowLowStock} disabled={loading}>
+          Stock Bajo
+        </button>
       </div>
 
       {view === 'form' && (
@@ -84,23 +251,25 @@ const Inventory = () => {
 
           <input
             type="text"
-            name="productName"
+            name="name"
             placeholder="Nombre del Producto"
-            value={form.productName}
+            value={form.name}
             onChange={handleChange}
             required
+            disabled={loading}
           />
-          {errors.productName && <p className="error-text">{errors.productName}</p>}
+          {errors.name && <p className="error-text">{errors.name}</p>}
 
           <input
             type="number"
-            name="currentStock"
+            name="quantity"
             placeholder="Stock Actual"
-            value={form.currentStock}
+            value={form.quantity}
             onChange={handleChange}
             required
+            disabled={loading}
           />
-          {errors.currentStock && <p className="error-text">{errors.currentStock}</p>}
+          {errors.quantity && <p className="error-text">{errors.quantity}</p>}
 
           <input
             type="number"
@@ -109,12 +278,28 @@ const Inventory = () => {
             value={form.minThreshold}
             onChange={handleChange}
             required
+            disabled={loading}
           />
           {errors.minThreshold && <p className="error-text">{errors.minThreshold}</p>}
 
-          <button type="submit">
-            {editingId ? 'Actualizar' : 'Agregar'}
+          <button type="submit" disabled={loading}>
+            {loading ? 'Procesando...' : (editingId ? 'Actualizar' : 'Agregar')}
           </button>
+          
+          {editingId && (
+            <button 
+              type="button" 
+              onClick={() => {
+                setForm(initialForm);
+                setEditingId(null);
+                setErrors({});
+              }}
+              disabled={loading}
+              style={{ marginLeft: '10px' }}
+            >
+              Cancelar
+            </button>
+          )}
         </form>
       )}
 
@@ -133,11 +318,11 @@ const Inventory = () => {
               </thead>
               <tbody>
                 {products.map((p) => {
-                  const isCritical = parseInt(p.currentStock) <= parseInt(p.minThreshold);
+                  const isCritical = parseInt(p.quantity) <= parseInt(p.minThreshold);
                   return (
                     <tr key={p.id} className={isCritical ? 'critical' : ''}>
-                      <td>{p.productName}</td>
-                      <td>{p.currentStock}</td>
+                      <td>{p.name}</td>
+                      <td>{p.quantity}</td>
                       <td>{p.minThreshold}</td>
                       <td>
                         {isCritical ? (
@@ -147,8 +332,20 @@ const Inventory = () => {
                         )}
                       </td>
                       <td>
-                        <button onClick={() => handleEdit(p)} className="btn-edit">Editar</button>
-                        <button onClick={() => handleDelete(p.id)} className="btn-delete">Eliminar</button>
+                        <button 
+                          onClick={() => handleEdit(p)} 
+                          className="btn-edit"
+                          disabled={loading}
+                        >
+                          Editar
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(p.id)} 
+                          className="btn-delete"
+                          disabled={loading}
+                        >
+                          Eliminar
+                        </button>
                       </td>
                     </tr>
                   );
