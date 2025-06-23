@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import '../Styles/Sales.css';
 
 const PRODUCTOS_DISPONIBLES = [
@@ -21,16 +22,29 @@ const PRODUCTOS_DISPONIBLES = [
 const RegistroVentas = () => {
   const [productosForm, setProductosForm] = useState([{ nombre: '', cantidad: 1 }]);
   const [cliente, setCliente] = useState('');
+  const [clientes, setClientes] = useState([]);
   const [metodoPago, setMetodoPago] = useState('');
   const [ventasRegistradas, setVentasRegistradas] = useState([]);
   const [vista, setVista] = useState('agregar');
   const navigate = useNavigate();
 
-  // Cambiar producto o cantidad en el formulario
+  useEffect(() => {
+    const fetchClientes = async () => {
+      try {
+        const response = await axios.get('http://localhost:3002/api/customers');
+        setClientes(response.data || []);
+      } catch (error) {
+        console.error('Error al obtener los clientes:', error);
+        setClientes([]);
+      }
+    };
+    fetchClientes();
+  }, []);
+
   const handleProductoChange = (index, field, value) => {
     const nuevosProductos = [...productosForm];
-    if(field === 'cantidad'){
-      const cantidad = Math.max(1, parseInt(value) || 1); // cantidad mínima 1
+    if (field === 'cantidad') {
+      const cantidad = Math.max(1, parseInt(value) || 1);
       nuevosProductos[index][field] = cantidad;
     } else {
       nuevosProductos[index][field] = value;
@@ -38,35 +52,29 @@ const RegistroVentas = () => {
     setProductosForm(nuevosProductos);
   };
 
-  // Agregar nuevo producto vacío
   const agregarProductoForm = () => {
     setProductosForm([...productosForm, { nombre: '', cantidad: 1 }]);
   };
 
-  // Eliminar producto del formulario
   const eliminarProductoForm = (index) => {
-    if(productosForm.length === 1) return; // Siempre debe quedar al menos 1 producto
-    const nuevosProductos = productosForm.filter((_, i) => i !== index);
-    setProductosForm(nuevosProductos);
+    if (productosForm.length === 1) return;
+    setProductosForm(productosForm.filter((_, i) => i !== index));
   };
 
-  // Calcular total tomando precios de productos quemados
   const calcularTotalForm = () => {
     return productosForm.reduce((total, producto) => {
       const prod = PRODUCTOS_DISPONIBLES.find(p => p.nombre === producto.nombre);
-      if(prod){
+      if (prod) {
         return total + (producto.cantidad * prod.precio);
       }
       return total;
     }, 0).toFixed(2);
   };
 
-  // Registrar venta
   const registrarVenta = () => {
-    // Validar que todos los productos tengan nombre válido
     const productosValidos = productosForm.every(p => p.nombre.trim() !== '' && p.cantidad > 0);
     if (!productosValidos) {
-      alert('Por favor, selecciona un producto válido y cantidad mayor a 0 para todos los productos.');
+      alert('Seleccione un producto válido y cantidad mayor a 0.');
       return;
     }
 
@@ -92,17 +100,10 @@ const RegistroVentas = () => {
       <h2>Registro y Control de Ventas</h2>
 
       <div className="top-buttons">
-        <button
-          onClick={() => setVista('agregar')}
-          className={vista === 'agregar' ? 'active' : ''}
-        >
+        <button onClick={() => setVista('agregar')} className={vista === 'agregar' ? 'active' : ''}>
           Agregar Venta
         </button>
-        <button
-          onClick={() => setVista('ver')}
-          className={vista === 'ver' ? 'active' : ''}
-          disabled={ventasRegistradas.length === 0}
-        >
+        <button onClick={() => setVista('ver')} className={vista === 'ver' ? 'active' : ''} disabled={ventasRegistradas.length === 0}>
           Ver Ventas ({ventasRegistradas.length})
         </button>
       </div>
@@ -110,11 +111,10 @@ const RegistroVentas = () => {
       {vista === 'agregar' && (
         <>
           {productosForm.map((producto, index) => (
-            <div key={index} className="producto-item" style={{ alignItems: 'center' }}>
+            <div key={index} className="producto-item">
               <select
                 value={producto.nombre}
                 onChange={(e) => handleProductoChange(index, 'nombre', e.target.value)}
-                style={{ flex: 3, padding: '8px', borderRadius: '6px', border: '1px solid #ccc' }}
               >
                 <option value="">Seleccione producto</option>
                 {PRODUCTOS_DISPONIBLES.map((p) => (
@@ -129,45 +129,42 @@ const RegistroVentas = () => {
                 min="1"
                 value={producto.cantidad}
                 onChange={(e) => handleProductoChange(index, 'cantidad', e.target.value)}
-                style={{ flex: 1, marginLeft: '10px', padding: '8px', borderRadius: '6px', border: '1px solid #ccc' }}
               />
 
               <button
                 onClick={() => eliminarProductoForm(index)}
-                style={{
-                  marginLeft: '10px',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '8px 12px',
-                  cursor: productosForm.length === 1 ? 'not-allowed' : 'pointer',
-                  opacity: productosForm.length === 1 ? 0.5 : 1,
-                }}
                 disabled={productosForm.length === 1}
-                title={productosForm.length === 1 ? "Debe tener al menos un producto" : "Eliminar producto"}
               >
                 X
               </button>
             </div>
           ))}
 
-          <button onClick={agregarProductoForm} style={{ marginTop: '10px', padding: '8px 12px' }}>
+          <button onClick={agregarProductoForm} style={{ marginTop: '10px' }}>
             + Agregar otro producto
           </button>
 
-          <input
-            type="text"
-            placeholder="Nombre del cliente (opcional)"
+          <select
             value={cliente}
             onChange={(e) => setCliente(e.target.value)}
-            style={{ marginTop: '15px', padding: '8px', borderRadius: '6px', border: '1px solid #ccc', width: '100%' }}
-          />
+            style={{ marginTop: '15px' }}
+          >
+            {clientes.length > 0 ? (
+              <>
+                <option value="">Seleccione cliente</option>
+                {clientes.map((c) => (
+                  <option key={c.id} value={c.nombre}>{c.nombre}</option>
+                ))}
+              </>
+            ) : (
+              <option value="">No hay clientes registrados</option>
+            )}
+          </select>
 
           <select
             value={metodoPago}
             onChange={(e) => setMetodoPago(e.target.value)}
-            style={{ marginTop: '10px', padding: '8px', borderRadius: '6px', border: '1px solid #ccc', width: '100%' }}
+            style={{ marginTop: '10px' }}
           >
             <option value="">Seleccione método de pago</option>
             <option value="Efectivo">Efectivo</option>
@@ -175,24 +172,11 @@ const RegistroVentas = () => {
             <option value="Transferencia">Transferencia</option>
           </select>
 
-          <p style={{ marginTop: '15px', fontWeight: 'bold' }}>Total: ${calcularTotalForm()}</p>
+          <p style={{ marginTop: '15px', fontWeight: 'bold' }}>
+            Total: ${calcularTotalForm()}
+          </p>
 
-          <button
-            className="button"
-            onClick={registrarVenta}
-            style={{
-              width: '100%',
-              padding: '12px',
-              backgroundColor: '#2563eb',
-              color: 'white',
-              fontWeight: '700',
-              fontSize: '1.1rem',
-              borderRadius: '10px',
-              border: 'none',
-              cursor: 'pointer',
-              marginTop: '10px',
-            }}
-          >
+          <button className="btn-registrar2" onClick={registrarVenta}>
             Registrar Venta
           </button>
         </>
@@ -201,12 +185,10 @@ const RegistroVentas = () => {
       {vista === 'ver' && (
         <>
           {ventasRegistradas.length === 0 ? (
-            <p style={{ textAlign: 'center', marginTop: '20px', fontStyle: 'italic' }}>
-              No hay ventas registradas.
-            </p>
+            <p style={{ textAlign: 'center' }}>No hay ventas registradas.</p>
           ) : (
-            <div className="table-wrapper" style={{ overflowX: 'auto', marginTop: '20px' }}>
-              <table className="inventory-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div className="table-wrapper">
+              <table className="inventory-table">
                 <thead>
                   <tr>
                     <th>ID</th>
@@ -219,16 +201,14 @@ const RegistroVentas = () => {
                 </thead>
                 <tbody>
                   {ventasRegistradas.map((venta) => (
-                    <tr key={venta.id} style={{ borderBottom: '1px solid #ddd' }}>
+                    <tr key={venta.id}>
                       <td>{venta.id}</td>
                       <td>{venta.cliente}</td>
                       <td>{venta.metodoPago || 'No especificado'}</td>
-                      <td style={{ textAlign: 'left' }}>
-                        <ul style={{ paddingLeft: '1.2rem', margin: 0 }}>
+                      <td>
+                        <ul>
                           {venta.productos.map((p, i) => (
-                            <li key={i}>
-                              {p.nombre} x {p.cantidad}
-                            </li>
+                            <li key={i}>{p.nombre} x {p.cantidad}</li>
                           ))}
                         </ul>
                       </td>

@@ -21,7 +21,6 @@ const SupervisorPage = () => {
           {supervisorOptions.map((option, index) => (
             <div key={index} className="supervisor-card">
               <div className="supervisor-img-placeholder">
-                <img src={option.img} alt={option.imgAlt} className="admin-img" />
               </div>
               <button
                 className="supervisor-btn"

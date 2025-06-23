@@ -288,3 +288,9 @@
     min-width: 400px;
   }
 }
+.error-text {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
