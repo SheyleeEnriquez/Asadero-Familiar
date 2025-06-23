@@ -4,9 +4,9 @@ import '../Styles/ModEmployee.css';
 import successGif from '../Assets/success.gif';
 
 const initialForm = {
+  documentNumber: '',
   names: '',
   lastnames: '',
-  documentNumber: '',
   address: '',
   phoneNumber: '',
   email: '',
@@ -123,7 +123,7 @@ const EmployeeCRUD = () => {
   const [view, setView] = useState('form');
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const API_URL = 'http://localhost:3000/api/employees';
+  const API_URL = 'http://localhost:3010/api/employees';
 
   useEffect(() => {
     fetchEmployees();
@@ -132,7 +132,8 @@ const EmployeeCRUD = () => {
   const fetchEmployees = async () => {
     try {
       const response = await axios.get(API_URL);
-      setEmployees(response.data);
+      setEmployees(response.data.employees);
+      console.log('Empleados obtenidos:', response.data.employees);
     } catch (error) {
       console.error('Error al obtener empleados:', error);
     }
