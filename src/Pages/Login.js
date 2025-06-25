@@ -20,10 +20,10 @@ function Login() {
       throw new Error('Usuario no válido después del login');
     }
 
-    // Check if the user is verified
-    //if (!user.emailVerified) {
-      //throw new Error('Por favor, verifica tu correo electrónico antes de iniciar sesión.');
-    //}
+    //Check if the user is verified
+    if (!user.emailVerified) {
+      throw new Error('Por favor, verifica tu correo electrónico antes de iniciar sesión.');
+    }
 
     // Get the ID token with claims
     const idTokenResult = await user.getIdTokenResult();

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../Styles/ModEmployee.css';
 import successGif from '../Assets/success.gif';
+import { auth } from '../config/firebase-config';
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification, deleteUser } from 'firebase/auth';
 
 const initialForm = {
   documentNumber: '',
@@ -12,7 +14,6 @@ const initialForm = {
   email: '',
   role: '',
   charge: '',
-  firebaseUid: '',
   branchId: ''
 };
 
@@ -23,7 +24,6 @@ const initialErrors = {
   address: '',
   phoneNumber: '',
   email: '',
-  firebaseUid: '',
   branchId: ''
 };
 
@@ -77,11 +77,6 @@ const validateField = (name, value) => {
         error = 'Formato de correo electrónico no válido';
       }
       break;
-    case 'firebaseUid':
-      if (!value.trim()) {
-        error = 'Firebase UID es requerido';
-      }
-      break;
     case 'branchId':
       if (!value.trim()) {
         error = 'ID de sucursal es requerido';
@@ -100,7 +95,6 @@ const fieldLabels = {
   address: 'Dirección',
   phoneNumber: 'Teléfono',
   email: 'Correo',
-  firebaseUid: 'Firebase UID',
   branchId: 'Sucursal'
 };
 
@@ -111,7 +105,6 @@ const placeholders = {
   address: 'Av. Siempre Viva 123',
   phoneNumber: '0998765432',
   email: 'correo@ejemplo.com',
-  firebaseUid: 'abc123xyz',
   branchId: '001'
 };
 
@@ -164,7 +157,46 @@ const EmployeeCRUD = () => {
         console.warn('Edición aún no implementada en backend');
         setEditingId(null);
       } else {
-        await axios.post(API_URL, form);
+        //Crear usuario en Firebase
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          form.email,
+          form.documentNumber
+        );
+        const firebaseUser = userCredential.user;
+
+        // Display Name
+        await updateProfile(firebaseUser, {
+          displayName: `${form.names} ${form.lastnames}`
+        });
+
+        // Enviar petición a backend para setear claims (debes tener un endpoint como /setCustomClaims)
+        const idToken = await firebaseUser.getIdToken();
+        const response = await fetch('http://localhost:3050/api/register-role', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`
+          },
+          body: JSON.stringify({
+            uid: firebaseUser.uid,
+            role: form.role
+          })
+        });
+
+        if (!response.ok) {
+          // ❌ Falló la asignación de rol → eliminar usuario
+          await deleteUser(firebaseUser);
+          throw new Error('Error al asignar el rol. El usuario fue eliminado automáticamente.');
+        }
+
+        //Sí se logró la asignación
+        //Correo de verificación
+        await sendEmailVerification(firebaseUser);
+        
+        //Guardar empleado en backend
+        const empleadoConUid = { ...form, firebaseUid: firebaseUser.uid };
+        await axios.post(API_URL, empleadoConUid);
         setShowSuccess(true);
         setTimeout(() => {
           setShowSuccess(false);
