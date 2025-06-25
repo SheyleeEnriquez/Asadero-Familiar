@@ -172,19 +172,20 @@ const EmployeeCRUD = () => {
 
         // Enviar petición a backend para setear claims (debes tener un endpoint como /setCustomClaims)
         const idToken = await firebaseUser.getIdToken();
-        const response = await fetch('http://localhost:3050/api/register-role', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${idToken}`
-          },
-          body: JSON.stringify({
-            uid: firebaseUser.uid,
+        const response = await axios.post(
+          'http://localhost:3050/api/register-role',
+          {
+            firebaseUid: firebaseUser.uid,
             role: form.role
-          })
-        });
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`
+            }
+          }
+        );
 
-        if (!response.ok) {
+        if (response.status !== 201) {
           // ❌ Falló la asignación de rol → eliminar usuario
           await deleteUser(firebaseUser);
           throw new Error('Error al asignar el rol. El usuario fue eliminado automáticamente.');
@@ -247,7 +248,7 @@ const EmployeeCRUD = () => {
         <form onSubmit={handleSubmit} className="employee-form">
           <div className="form-grid">
             {Object.entries(form).map(([key, value]) => (
-              (key !== 'charge' || form.role === 'empleado') &&
+              (key !== 'charge' || form.role === 'Empleado') &&
               key !== 'role' && key !== 'charge' ? (
                 <div key={key} className="form-group">
                   <label htmlFor={key}>{fieldLabels[key]}</label>
@@ -269,13 +270,13 @@ const EmployeeCRUD = () => {
               <label htmlFor="role">Rol</label>
               <select id="role" name="role" value={form.role} onChange={handleChange} required>
                 <option value="" disabled>Rol en el Sistema</option>
-                <option value="administrador">Administrador</option>
-                <option value="supervisor">Supervisor</option>
-                <option value="empleado">Empleado</option>
+                <option value="Administrador">Administrador</option>
+                <option value="Supervisor">Supervisor</option>
+                <option value="Empleado">Empleado</option>
               </select>
             </div>
 
-            {form.role === "empleado" && (
+            {form.role === "Empleado" && (
               <div className="form-group">
                 <label htmlFor="charge">Cargo</label>
                 <select id="charge" name="charge" value={form.charge} onChange={handleChange} required>
