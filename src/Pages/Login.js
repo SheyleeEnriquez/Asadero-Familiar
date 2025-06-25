@@ -57,10 +57,6 @@ function Login() {
 
   return (
     <div className="login-page animate-bg">
-      <header className="login-header">
-        <img src={logo} alt="Asadero Familiar Logo" className="logo" />
-      </header>
-
       <div className="login-container">
         <div className="login-logo-container">
           <img src={logo} alt="Asadero Familiar Logo" className="login-logo-container" />
@@ -73,10 +69,16 @@ function Login() {
         <form className="login-form" onSubmit={handleSubmit}>
           <label htmlFor="user">Usuario</label>
           <input id="user" name="user" type="text" placeholder="JuanGonzalez" required />
+          
           <label htmlFor="password">Contraseña</label>
           <input id="password" name="password" type="password" placeholder="*****" required />
+          
           <button type="submit">Ingresar</button>
+
+          {/* Texto añadido debajo del botón */}
+          <p className="forgot-password-text">¿Olvidaste tu contraseña?</p>
         </form>
+
       </div>
     </div>
   );

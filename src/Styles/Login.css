@@ -8,8 +8,8 @@ body {
 }
 
 .login-container {
-  max-width: 600px;
-  margin: 50px auto;
+  max-width: 700px;
+  margin: 100px auto;
   padding: 30px 20px;
   background: linear-gradient(to top, #d1b591, #e8d9abad);
   transition: background 20s ease;
@@ -187,4 +187,16 @@ body {
   font-weight: 600;
   letter-spacing: 1px;
   margin: 0;
+}
+
+.forgot-password-text {
+  margin-top: 30px;
+  text-align: center;
+  font-size: 16px;
+  color: #32529d;
+  cursor: pointer;
+}
+
+.forgot-password-text:hover {
+  text-decoration: underline;
 }
