@@ -17,7 +17,8 @@ const RegistroVentas = () => {
     const fetchClientes = async () => {
       try {
         const response = await axios.get('http://localhost:3020/api/customers');
-        setClientes(response.data || []);
+        setClientes(response.data.customers || []);
+        console.log('Clientes obtenidos:', response.data.customers);
       } catch (error) {
         console.error('Error al obtener los clientes:', error);
         setClientes([]);
@@ -28,6 +29,7 @@ const RegistroVentas = () => {
       try {
         const response = await axios.get('http://localhost:3030/api/products');
         setProductosDisponibles(response.data.products);
+        console.log('Productos disponibles:', response.data.products);
       } catch (error) {
         console.error('Error al obtener productos:', error);
         setProductosDisponibles([]);
@@ -163,7 +165,7 @@ const RegistroVentas = () => {
               <>
                 <option value="">Seleccione cliente</option>
                 {clientes.map((c) => (
-                  <option key={c.id} value={c.id}>{c.nombre}</option>
+                  <option key={c.id} value={c.id}>{c.names} {c.lastnames}</option>
                 ))}
               </>
             ) : (

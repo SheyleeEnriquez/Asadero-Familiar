@@ -1,6 +1,7 @@
 import React from 'react';
 import '../Styles/SidebarEmployee.css';
 import logo from '../Assets/logo.png';
+import { auth } from '../config/firebase-config';
 
 const SidebarEmployee = ({ onSelect, activeItem, menuItems, className }) => {
   const getIcon = (id) => {
@@ -14,7 +15,10 @@ const SidebarEmployee = ({ onSelect, activeItem, menuItems, className }) => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await auth.signOut();
+    localStorage.removeItem('userToken')
+    localStorage.removeItem('adminToken');
     window.location.href = '/'; // Redirige a la página principal
   };
 
