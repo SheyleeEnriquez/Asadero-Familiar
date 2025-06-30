@@ -33,9 +33,13 @@ function Login() {
     if (!userRole) {
       throw new Error('El rol del usuario no está definido. Por favor, contacta al administrador.');
     }
+
+    const idToken = await user.getIdToken();
+    localStorage.setItem('userToken', idToken);
     
     switch (userRole) {
       case 'Administrador':
+        localStorage.setItem('adminToken', idToken);
         window.location.href = '/admin';  
         break;
       case 'Supervisor':
@@ -74,9 +78,6 @@ function Login() {
           <input id="password" name="password" type="password" placeholder="*****" required />
           
           <button type="submit">Ingresar</button>
-
-          {/* Texto añadido debajo del botón */}
-          <p className="forgot-password-text">¿Olvidaste tu contraseña?</p>
         </form>
 
       </div>

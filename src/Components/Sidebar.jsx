@@ -2,6 +2,7 @@ import React from 'react';
 import '../Styles/Sidebar.css';
 import logo from '../Assets/logo.png';
 import { useNavigate } from 'react-router-dom';
+import { auth } from '../config/firebase-config';
 
 const Sidebar = ({ onSelect, activeItem = 'panel' }) => {
   const menuItems = [
@@ -14,7 +15,10 @@ const Sidebar = ({ onSelect, activeItem = 'panel' }) => {
     
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await auth.signOut();
+    localStorage.removeItem('userToken')
+    localStorage.removeItem('adminToken');
     navigate('/');
   };
 

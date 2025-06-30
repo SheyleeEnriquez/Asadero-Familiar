@@ -3,7 +3,7 @@ import axios from 'axios';
 import '../Styles/ModEmployee.css';
 import successGif from '../Assets/success.gif';
 import { auth } from '../config/firebase-config';
-import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification, deleteUser } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification} from 'firebase/auth';
 
 const initialForm = {
   documentNumber: '',
@@ -79,7 +79,7 @@ const validateField = (name, value) => {
       break;
     case 'branchId':
       if (!value.trim()) {
-        error = 'ID de sucursal es requerido';
+        error = 'Sucursal es requerida';
       }
       break;
     default:
@@ -104,27 +104,42 @@ const placeholders = {
   documentNumber: '1723456789',
   address: 'Av. Siempre Viva 123',
   phoneNumber: '0998765432',
-  email: 'correo@ejemplo.com',
-  branchId: '001'
+  email: 'correo@ejemplo.com'
 };
 
 const EmployeeCRUD = () => {
   const [employees, setEmployees] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState(initialErrors);
   const [editingId, setEditingId] = useState(null);
   const [view, setView] = useState('form');
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const API_URL = 'http://localhost:3010/api/employees';
+  const API_EMPLOYEES_URL = 'http://localhost:3010/api/employees';
+  const API_BRANCHES_URL = 'http://localhost:3010/api/branches';
+  const API_AUTH_URL = 'http://localhost:3050/api';
+
+  const adminToken = localStorage.getItem('adminToken');
 
   useEffect(() => {
     fetchEmployees();
+    fetchBranches();
   }, []);
+
+  const fetchBranches = async () => {
+    try {
+      const response = await axios.get(API_BRANCHES_URL);
+      setBranches(response.data.branches);
+      console.log('Sucursales obtenidas:', response.data.branches);
+    } catch (error) {
+      console.error('Error al obtener sucursales:', error);
+    }
+  };
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get(API_URL);
+      const response = await axios.get(API_EMPLOYEES_URL);
       setEmployees(response.data.employees);
       console.log('Empleados obtenidos:', response.data.employees);
     } catch (error) {
@@ -134,7 +149,18 @@ const EmployeeCRUD = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    let updatedForm = { ...form, [name]: value };
+
+    // Si cambia el rol a Administrador o Supervisor, también se asigna como cargo
+    if (name === 'role') {
+      if (value === 'Administrador' || value === 'Supervisor') {
+        updatedForm.charge = value;
+      } else if (value === 'Empleado') {
+        updatedForm.charge = ''; // Vacía para que lo seleccione el usuario
+      }
+    }
+
+    setForm(updatedForm);
     setErrors({ ...errors, [name]: validateField(name, value) });
   };
 
@@ -152,12 +178,20 @@ const EmployeeCRUD = () => {
     setErrors(newErrors);
     if (!isValid) return;
 
+    if (form.role === 'Administrador' || form.role === 'Supervisor') {
+      form.charge = form.role;
+    }
+
     try {
       if (editingId !== null) {
-        console.warn('Edición aún no implementada en backend');
+        // Si estás editando un empleado existente
+        await axios.put(`${API_EMPLOYEES_URL}/${editingId}`, form);
+        console.log('Empleado actualizado con éxito');
         setEditingId(null);
+        setForm(initialForm);
+        fetchEmployees();
       } else {
-        //Crear usuario en Firebase
+        // 1️⃣ Crear usuario en Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(
           auth,
           form.email,
@@ -165,47 +199,64 @@ const EmployeeCRUD = () => {
         );
         const firebaseUser = userCredential.user;
 
-        // Display Name
+        // 2️⃣ Asignar displayName
         await updateProfile(firebaseUser, {
           displayName: `${form.names} ${form.lastnames}`
         });
 
-        // Enviar petición a backend para setear claims (debes tener un endpoint como /setCustomClaims)
-        const idToken = await firebaseUser.getIdToken();
+        // 3️⃣ Obtener claims de rol → Backend
         const response = await axios.post(
-          'http://localhost:3050/api/register-role',
+          `${API_AUTH_URL}/register-role`,
           {
             firebaseUid: firebaseUser.uid,
             role: form.role
           },
           {
             headers: {
-              Authorization: `Bearer ${idToken}`
-            }
+              Authorization: `Bearer ${adminToken}`
+            },
+            validateStatus: () => true // 👈 Forzar que NUNCA lance excepción automática
           }
         );
 
+        console.log('Código de respuesta:', response.status);
+
         if (response.status !== 201) {
-          // ❌ Falló la asignación de rol → eliminar usuario
-          await deleteUser(firebaseUser);
+          console.error('Falló asignación de rol, eliminando usuario en Firebase...');
+          const seElimino = await axios.delete(
+            `${API_AUTH_URL}/delete-account`,
+            {
+              data: { firebaseUid: firebaseUser.uid },
+              headers: {
+                Authorization: `Bearer ${adminToken}`
+              }
+            }
+          );
+
+          console.log('Usuario eliminado de Firebase:', seElimino.data);
+
           throw new Error('Error al asignar el rol. El usuario fue eliminado automáticamente.');
         }
 
-        //Sí se logró la asignación
-        //Correo de verificación
+        // 4️⃣ Enviar correo de verificación
         await sendEmailVerification(firebaseUser);
-        
-        //Guardar empleado en backend
+
+        // 5️⃣ Guardar empleado en BD
         const empleadoConUid = { ...form, firebaseUid: firebaseUser.uid };
-        await axios.post(API_URL, empleadoConUid);
+        await axios.post(API_EMPLOYEES_URL, empleadoConUid);
+
+        // 6️⃣ Mostrar éxito
         setShowSuccess(true);
         setTimeout(() => {
           setShowSuccess(false);
           setView('form');
         }, 3000);
       }
+
+      // Reset y refresh
       setForm(initialForm);
       fetchEmployees();
+
     } catch (error) {
       console.error('Error al guardar empleado:', error);
     }
@@ -220,12 +271,28 @@ const EmployeeCRUD = () => {
   const handleDelete = async (id) => {
     if (window.confirm('¿Estás seguro de eliminar este empleado?')) {
       try {
-        await axios.delete(`${API_URL}/${id}`);
+        await axios.delete(`${API_EMPLOYEES_URL}/${id}`);
+        let firebaseUidDeleted = employees.find(emp => emp.id === id).firebaseUid;
+        await axios.delete(
+            `${API_AUTH_URL}/delete-account`, 
+            {
+            data: { firebaseUid: firebaseUidDeleted },
+            headers: {
+              Authorization: `Bearer ${adminToken}`
+            }
+            }
+          );
         fetchEmployees();
       } catch (error) {
         console.error('Error al eliminar empleado:', error);
       }
     }
+  };
+
+  // Función para obtener el nombre de la sucursal por ID
+  const getBranchName = (branchId) => {
+    const branch = branches.find(b => b.id === branchId);
+    return branch ? branch.name : branchId;
   };
 
   return (
@@ -249,7 +316,7 @@ const EmployeeCRUD = () => {
           <div className="form-grid">
             {Object.entries(form).map(([key, value]) => (
               (key !== 'charge' || form.role === 'Empleado') &&
-              key !== 'role' && key !== 'charge' ? (
+              key !== 'role' && key !== 'charge' && key !== 'branchId' ? (
                 <div key={key} className="form-group">
                   <label htmlFor={key}>{fieldLabels[key]}</label>
                   <input
@@ -288,6 +355,19 @@ const EmployeeCRUD = () => {
                 </select>
               </div>
             )}
+
+            <div className="form-group">
+              <label htmlFor="branchId">Sucursal</label>
+              <select id="branchId" name="branchId" value={form.branchId} onChange={handleChange} required>
+                <option value="" disabled>Seleccione una sucursal</option>
+                {branches.map((branch) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+              {errors.branchId && <div className="input-error">{errors.branchId}</div>}
+            </div>
           </div>
           <button type="submit">{editingId ? 'Actualizar' : 'Agregar'}</button>
         </form>
@@ -322,7 +402,7 @@ const EmployeeCRUD = () => {
                     <td>{emp.email}</td>
                     <td>{emp.charge}</td>
                     <td>{emp.role}</td>
-                    <td>{emp.branchId}</td>
+                    <td>{getBranchName(emp.branchId)}</td>
                     <td>
                       <button onClick={() => handleEdit(emp)} className="btn-edit">Editar</button>
                       <button onClick={() => handleDelete(emp.id)} className="btn-delete">Eliminar</button>

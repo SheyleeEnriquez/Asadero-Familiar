@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import '../Styles/ModCustomer.css';
 import user from '../Assets/user.gif';
 
 const initialForm = {
-  id: '',
+  documentNumber: '',
   names: '',
   lastnames: '',
-  idCard: '',
   address: '',
-  phone: '',
+  phoneNumber: '',
   email: ''
 };
 
 const initialErrors = {
+  documentNumber: '',
   names: '',
   lastnames: '',
-  idCard: '',
   address: '',
-  phone: '',
+  phoneNumber: '',
   email: ''
 };
 
@@ -53,14 +53,14 @@ const validateField = (name, value, customers, editingId) => {
         error = `${name === 'names' ? 'Nombres' : 'Apellidos'} no debe exceder 50 caracteres`;
       }
       break;
-    case 'idCard':
+    case 'documentNumber':
       if (!value.trim()) {
         error = 'Cédula es requerida';
       } else if (!/^\d{10}$/.test(value)) {
         error = 'Cédula debe tener exactamente 10 dígitos';
       } else if (!validateEcuadorianID(value)) {
         error = 'Cédula ecuatoriana no válida';
-      } else if (customers.find(c => c.idCard === value && c.id !== editingId)) {
+      } else if (customers.find(c => c.documentNumber === value && c.id !== editingId)) {
         error = 'Ya existe un cliente con esta cédula';
       }
       break;
@@ -73,7 +73,7 @@ const validateField = (name, value, customers, editingId) => {
         error = 'Dirección no debe exceder 100 caracteres';
       }
       break;
-    case 'phone':
+    case 'phoneNumber':
       const cleanedPhone = value.replace(/[\s\-\(\)]/g, '');
       if (!value.trim()) {
         error = 'Teléfono es requerido';
@@ -106,14 +106,21 @@ const CustomerCRUD = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [errors, setErrors] = useState(initialErrors);
 
-  const API_URL = 'http://localhost:3002/api/customers';
+  const API_URL = 'http://localhost:3020/api/customers';
 
   useEffect(() => {
-    fetch(API_URL)
-      .then((res) => res.json())
-      .then((data) => setCustomers(data))
-      .catch((err) => console.error('Error al cargar los clientes:', err));
+    fetchCustomers();
   }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      const response = await axios.get(API_URL);
+      setCustomers(response.data.customers);
+      console.log('Clientes obtenidos:', response.data.customer);
+    } catch (error) {
+      console.error('Error al obtener clientes:', error);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -127,6 +134,8 @@ const CustomerCRUD = () => {
     e.preventDefault();
     const newErrors = {};
     let isValid = true;
+
+    console.log('Formulario enviado:', form);
 
     Object.keys(form).forEach(key => {
       if (key !== 'id') {
@@ -142,10 +151,15 @@ const CustomerCRUD = () => {
     const method = editingId ? 'PUT' : 'POST';
     const url = editingId ? `${API_URL}/${editingId}` : API_URL;
 
+    const dataToSend = editingId ? form : { ...form }; // Clona el form
+    if (!editingId) {
+      delete dataToSend.id; // ← Esto evita que se envíe id vacío en creación
+    }
+
     fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      body: JSON.stringify(dataToSend)
     })
       .then((res) => res.json())
       .then((data) => {
@@ -203,9 +217,9 @@ const CustomerCRUD = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="idCard">Cédula</label>
-              <input name="idCard" placeholder="Ej. 0102030405" value={form.idCard} onChange={handleChange} required />
-              {errors.idCard && <div className="input-error">{errors.idCard}</div>}
+              <label htmlFor="documentNumber">Cédula</label>
+              <input name="documentNumber" placeholder="Ej. 0102030405" value={form.documentNumber} onChange={handleChange} required />
+              {errors.documentNumber && <div className="input-error">{errors.documentNumber}</div>}
             </div>
             <div className="form-group">
               <label htmlFor="address">Dirección</label>
@@ -216,9 +230,9 @@ const CustomerCRUD = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="phone">Teléfono</label>
-              <input name="phone" placeholder="Ej. 0991234567" value={form.phone} onChange={handleChange} />
-              {errors.phone && <div className="input-error">{errors.phone}</div>}
+              <label htmlFor="phoneNumber">Teléfono</label>
+              <input name="phoneNumber" placeholder="Ej. 0991234567" value={form.phoneNumber} onChange={handleChange} />
+              {errors.phoneNumber && <div className="input-error">{errors.phoneNumber}</div>}
             </div>
             <div className="form-group">
               <label htmlFor="email">Correo Electrónico</label>
@@ -253,9 +267,9 @@ const CustomerCRUD = () => {
                   <tr key={c.id}>
                     <td>{c.names}</td>
                     <td>{c.lastnames}</td>
-                    <td>{c.idCard}</td>
+                    <td>{c.documentNumber}</td>
                     <td>{c.address}</td>
-                    <td>{c.phone}</td>
+                    <td>{c.phoneNumber}</td>
                     <td>{c.email}</td>
                     <td>
                       <button onClick={() => handleEdit(c)} className="btn-edit">Editar</button>
