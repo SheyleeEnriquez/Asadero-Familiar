@@ -81,6 +81,9 @@ function Login() {
           <input id="password" name="password" type="password" placeholder="*****" required />
           
           <button type="submit">Ingresar</button>
+
+          {/* Texto añadido debajo del botón */}
+          <p className="forgot-password-text">¿Olvidaste tu contraseña?</p>
         </form>
 
         <div style={{ marginTop: '15px', textAlign: 'center' }}>
