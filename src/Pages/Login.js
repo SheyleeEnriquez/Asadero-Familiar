@@ -3,6 +3,7 @@ import '../Styles/Login.css';
 import logo from '../Assets/logo.png';
 import { auth } from '../config/firebase-config';
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { Link } from 'react-router-dom';
 function Login() {
   const handleSubmit = async (e) => {
   e.preventDefault();
@@ -40,12 +41,14 @@ function Login() {
     switch (userRole) {
       case 'Administrador':
         localStorage.setItem('adminToken', idToken);
+        
         window.location.href = '/admin';  
         break;
       case 'Supervisor':
         window.location.href = '/supervisor';  
         break;
       case 'Empleado':
+        localStorage.setItem('employeeEmail',email)
         window.location.href = '/employee'; 
         break;
       default:
@@ -80,6 +83,18 @@ function Login() {
           <button type="submit">Ingresar</button>
         </form>
 
+        <div style={{ marginTop: '15px', textAlign: 'center' }}>
+          <Link 
+            to="/olvido-contraseña" 
+            style={{
+              color: '#8b7355',
+              fontSize: '14px',
+              textDecoration: 'underline'
+            }}
+          >
+          ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
       </div>
     </div>
   );

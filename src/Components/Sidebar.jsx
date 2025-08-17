@@ -19,6 +19,7 @@ const Sidebar = ({ onSelect, activeItem = 'panel' }) => {
     await auth.signOut();
     localStorage.removeItem('userToken')
     localStorage.removeItem('adminToken');
+    localStorage.removeItem('employeeEmail');
     navigate('/');
   };
 

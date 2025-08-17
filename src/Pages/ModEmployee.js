@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../Styles/ModEmployee.css';
+import StickyHeadTable from '../Components/StickyHeadTable';
 import successGif from '../Assets/success.gif';
 import { auth } from '../config/firebase-config';
 import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification} from 'firebase/auth';
@@ -164,28 +165,115 @@ const EmployeeCRUD = () => {
     setErrors({ ...errors, [name]: validateField(name, value) });
   };
 
+  const handleEdit = (employee) => {
+    setForm(employee);
+    setEditingId(employee.id);
+    setView('form');
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('¿Estás seguro de eliminar este empleado?')) {
+      try {
+        await axios.delete(`${API_EMPLOYEES_URL}/${id}`);
+        const employeeToDelete = employees.find(emp => emp.id === id);
+        if (employeeToDelete && employeeToDelete.firebaseUid) {
+          await axios.delete(
+            `${API_AUTH_URL}/delete-account`, 
+            {
+              data: { firebaseUid: employeeToDelete.firebaseUid },
+              headers: {
+                Authorization: `Bearer ${adminToken}`
+              }
+            }
+          );
+        }
+        fetchEmployees();
+      } catch (error) {
+        console.error('Error al eliminar empleado:', error);
+      }
+    }
+  };
+
+  // Función para obtener el nombre de la sucursal por ID
+  const getBranchName = (branchId) => {
+    const branch = branches.find(b => b.id === branchId);
+    return branch ? branch.name : branchId;
+  };
+
+  // Configuración de columnas para StickyHeadTable
+  const employeeColumns = [
+    { id: 'names', label: 'Nombres', minWidth: 100 },
+    { id: 'lastnames', label: 'Apellidos', minWidth: 100 },
+    { id: 'documentNumber', label: 'Cédula', minWidth: 100 },
+    { id: 'address', label: 'Dirección', minWidth: 150 },
+    { id: 'phoneNumber', label: 'Teléfono', minWidth: 100 },
+    { id: 'email', label: 'Correo', minWidth: 170 },
+    { id: 'charge', label: 'Cargo', minWidth: 100 },
+    { id: 'role', label: 'Rol', minWidth: 100 },
+    {
+      id: 'branchName',
+      label: 'Sucursal',
+      minWidth: 120,
+      format: (value) => value ? value.toUpperCase() : '',
+    },
+    {
+      id: 'acciones',
+      label: 'Acciones',
+      minWidth: 120,
+      format: (_, row) => (
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={() => handleEdit(row)} className="btn-edit">Editar</button>
+          <button onClick={() => handleDelete(row.id)} className="btn-delete">Eliminar</button>
+        </div>
+      ),
+    },
+  ];
+
+  // Preparar datos para la tabla agregando el nombre de la sucursal
+  const employeesWithBranchName = employees.map(emp => ({
+    ...emp,
+    branchName: getBranchName(emp.branchId),
+    acciones: emp.id // Necesario para que la columna de acciones funcione
+  }));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newErrors = {};
     let isValid = true;
     Object.entries(form).forEach(([key, value]) => {
-      const error = validateField(key, value);
-      newErrors[key] = error;
-      if (error) isValid = false;
+      if (key in initialErrors) { // Solo validar campos que están en initialErrors
+        const error = validateField(key, value);
+        newErrors[key] = error;
+        if (error) isValid = false;
+      }
     });
+
+    // Validación adicional para rol
+    if (!form.role.trim()) {
+      newErrors.role = 'Rol es requerido';
+      isValid = false;
+    }
+
+    // Validación adicional para cargo cuando es empleado
+    if (form.role === 'Empleado' && !form.charge.trim()) {
+      newErrors.charge = 'Cargo es requerido';
+      isValid = false;
+    }
 
     setErrors(newErrors);
     if (!isValid) return;
 
-    if (form.role === 'Administrador' || form.role === 'Supervisor') {
-      form.charge = form.role;
+    // Asegurar que el cargo coincida con el rol para Admin/Supervisor
+    let formToSubmit = { ...form };
+    if (formToSubmit.role === 'Administrador' || formToSubmit.role === 'Supervisor') {
+      formToSubmit.charge = formToSubmit.role;
     }
 
     try {
       if (editingId !== null) {
         // Si estás editando un empleado existente
-        await axios.put(`${API_EMPLOYEES_URL}/${editingId}`, form);
+        await axios.put(`${API_EMPLOYEES_URL}/${editingId}`, formToSubmit);
         console.log('Empleado actualizado con éxito');
         setEditingId(null);
         setForm(initialForm);
@@ -194,14 +282,14 @@ const EmployeeCRUD = () => {
         // 1️⃣ Crear usuario en Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(
           auth,
-          form.email,
-          form.documentNumber
+          formToSubmit.email,
+          formToSubmit.documentNumber
         );
         const firebaseUser = userCredential.user;
 
         // 2️⃣ Asignar displayName
         await updateProfile(firebaseUser, {
-          displayName: `${form.names} ${form.lastnames}`
+          displayName: `${formToSubmit.names} ${formToSubmit.lastnames}`
         });
 
         // 3️⃣ Obtener claims de rol → Backend
@@ -209,7 +297,7 @@ const EmployeeCRUD = () => {
           `${API_AUTH_URL}/register-role`,
           {
             firebaseUid: firebaseUser.uid,
-            role: form.role
+            role: formToSubmit.role
           },
           {
             headers: {
@@ -223,7 +311,7 @@ const EmployeeCRUD = () => {
 
         if (response.status !== 201) {
           console.error('Falló asignación de rol, eliminando usuario en Firebase...');
-          const seElimino = await axios.delete(
+          const deleteResponse = await axios.delete(
             `${API_AUTH_URL}/delete-account`,
             {
               data: { firebaseUid: firebaseUser.uid },
@@ -233,7 +321,7 @@ const EmployeeCRUD = () => {
             }
           );
 
-          console.log('Usuario eliminado de Firebase:', seElimino.data);
+          console.log('Usuario eliminado de Firebase:', deleteResponse.data);
 
           throw new Error('Error al asignar el rol. El usuario fue eliminado automáticamente.');
         }
@@ -242,7 +330,7 @@ const EmployeeCRUD = () => {
         await sendEmailVerification(firebaseUser);
 
         // 5️⃣ Guardar empleado en BD
-        const empleadoConUid = { ...form, firebaseUid: firebaseUser.uid };
+        const empleadoConUid = { ...formToSubmit, firebaseUid: firebaseUser.uid };
         await axios.post(API_EMPLOYEES_URL, empleadoConUid);
 
         // 6️⃣ Mostrar éxito
@@ -259,40 +347,8 @@ const EmployeeCRUD = () => {
 
     } catch (error) {
       console.error('Error al guardar empleado:', error);
+      alert('Error al guardar empleado: ' + error.message);
     }
-  };
-
-  const handleEdit = (employee) => {
-    setForm(employee);
-    setEditingId(employee.id);
-    setView('form');
-  };
-
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de eliminar este empleado?')) {
-      try {
-        await axios.delete(`${API_EMPLOYEES_URL}/${id}`);
-        let firebaseUidDeleted = employees.find(emp => emp.id === id).firebaseUid;
-        await axios.delete(
-            `${API_AUTH_URL}/delete-account`, 
-            {
-            data: { firebaseUid: firebaseUidDeleted },
-            headers: {
-              Authorization: `Bearer ${adminToken}`
-            }
-            }
-          );
-        fetchEmployees();
-      } catch (error) {
-        console.error('Error al eliminar empleado:', error);
-      }
-    }
-  };
-
-  // Función para obtener el nombre de la sucursal por ID
-  const getBranchName = (branchId) => {
-    const branch = branches.find(b => b.id === branchId);
-    return branch ? branch.name : branchId;
   };
 
   return (
@@ -341,6 +397,7 @@ const EmployeeCRUD = () => {
                 <option value="Supervisor">Supervisor</option>
                 <option value="Empleado">Empleado</option>
               </select>
+              {errors.role && <div className="input-error">{errors.role}</div>}
             </div>
 
             {form.role === "Empleado" && (
@@ -353,6 +410,7 @@ const EmployeeCRUD = () => {
                   <option value="mesero">Mesero</option>
                   <option value="parrillero">Parrillero</option>
                 </select>
+                {errors.charge && <div className="input-error">{errors.charge}</div>}
               </div>
             )}
 
@@ -376,41 +434,11 @@ const EmployeeCRUD = () => {
       {!showSuccess && view === 'list' && (
         <div className="table-wrapper">
           {employees.length > 0 ? (
-            <table className="employee-table">
-              <thead>
-                <tr>
-                  <th>Nombres</th>
-                  <th>Apellidos</th>
-                  <th>Cédula</th>
-                  <th>Dirección</th>
-                  <th>Teléfono</th>
-                  <th>Correo</th>
-                  <th>Cargo</th>
-                  <th>Rol</th>
-                  <th>Sucursal</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {employees.map((emp) => (
-                  <tr key={emp.id}>
-                    <td>{emp.names}</td>
-                    <td>{emp.lastnames}</td>
-                    <td>{emp.documentNumber}</td>
-                    <td>{emp.address}</td>
-                    <td>{emp.phoneNumber}</td>
-                    <td>{emp.email}</td>
-                    <td>{emp.charge}</td>
-                    <td>{emp.role}</td>
-                    <td>{getBranchName(emp.branchId)}</td>
-                    <td>
-                      <button onClick={() => handleEdit(emp)} className="btn-edit">Editar</button>
-                      <button onClick={() => handleDelete(emp.id)} className="btn-delete">Eliminar</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <StickyHeadTable 
+              columns={employeeColumns}
+              rows={employeesWithBranchName}
+              rowKey="id"
+            />
           ) : (
             <div className="empty-state">
               <h3>No hay empleados registrados</h3>

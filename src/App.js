@@ -5,6 +5,7 @@ import EmployeeDashboard from './Components/EmployeeDashboard';
 import Supervisor from './Pages/Supervisor';
 import ModCustomer from './Pages/ModCustomer';
 import ModEmployee from './Pages/ModEmployee';
+import ForgotPassword from './Pages/ForgotPassword';
 import Sales from './Pages/Sales';
 import PrivateRoute from './Components/PrivateRoute';
 
@@ -13,6 +14,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/olvido-contraseña" element={<ForgotPassword />} />
         <Route 
           path="/admin" 
           element={

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import '../Styles/Sales.css';
 
@@ -11,7 +10,27 @@ const RegistroVentas = () => {
   const [ventasRegistradas, setVentasRegistradas] = useState([]);
   const [vista, setVista] = useState('agregar');
   const [productosDisponibles, setProductosDisponibles] = useState([]);
-  const navigate = useNavigate();
+  const [employeeId, setEmployeeId] = useState('');
+  const employeeIdRef = useRef(null); // referencia en memoria
+
+  // --- Función para obtener el ID del empleado ---
+  const fetchIdByEmail = async () => {
+    if (employeeIdRef.current) {
+      return employeeIdRef.current; // ya lo tenemos en memoria
+    }
+    try {
+      const response = await axios.post('http://localhost:3010/api/employees/by-email', {
+        email: localStorage.getItem("employeeEmail")
+      });
+      console.log("ID del empleado recibido:", response.data);
+      setEmployeeId(response.data);
+      employeeIdRef.current = response.data; // guardamos en referencia
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener el ID del empleado:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     const fetchClientes = async () => {
@@ -38,17 +57,50 @@ const RegistroVentas = () => {
 
     const fetchOrdenes = async () => {
       try {
-        const response = await axios.get('http://localhost:3030/api/orders');
-        setVentasRegistradas(response.data.orders);
+        // 1. Obtener órdenes
+        const ordersRes = await axios.get('http://localhost:3030/api/orders');
+        const orders = ordersRes.data.orders;
+
+        // 2. Obtener clientes
+        const customersRes = await axios.get('http://localhost:3020/api/customers');
+        const customers = customersRes.data.customers || [];
+
+        const employeesRes = await axios.get('http://localhost:3010/api/employees');
+        const employees = employeesRes.data.employees || [];
+
+        // 3. Crear un mapa id → nombre completo
+        const customerMap = {};
+        customers.forEach(c => {
+          customerMap[c.id] = `${c.names} ${c.lastnames}`;
+        });
+
+        const employeeMap = {};
+        employees.forEach(c => {
+          employeeMap[c.id] = `${c.names} ${c.lastnames}`;
+        });
+
+        // 4. Agregar campo customerName a cada orden
+        const ordersWithNames = orders.map(order => ({
+          ...order,
+          customerName: customerMap[order.customerId] || 'Cliente desconocido',
+          employeeName: employeeMap[order.employeeId] || 'Empleado desconocido'
+        }));
+
+        console.log("Ordenes", ordersWithNames)
+
+        // 5. Guardar
+        setVentasRegistradas(ordersWithNames);
       } catch (error) {
-        console.error('Error al obtener órdenes:', error);
+        console.error('Error al obtener órdenes o clientes:', error);
         setVentasRegistradas([]);
       }
     };
 
+
     fetchClientes();
     fetchProductos();
     fetchOrdenes();
+    fetchIdByEmail(); // lo pedimos de entrada para tenerlo listo
   }, []);
 
   const handleProductoChange = (index, field, value) => {
@@ -82,30 +134,78 @@ const RegistroVentas = () => {
   };
 
   const registrarVenta = async () => {
-    const productosValidos = productosForm.every(p => p.productId && p.quantity > 0);
-    if (!productosValidos) {
-      alert('Seleccione un producto válido y cantidad mayor a 0.');
+  const productosValidos = productosForm.every(p => p.productId && p.quantity > 0);
+  if (!productosValidos) {
+    alert('Seleccione un producto válido y cantidad mayor a 0.');
+    return;
+  }
+
+  // aseguramos el ID del empleado
+  let empleadoIdFinal = employeeIdRef.current || employeeId;
+  if (!empleadoIdFinal) {
+    empleadoIdFinal = await fetchIdByEmail();
+    if (!empleadoIdFinal) {
+      alert('No se pudo obtener el ID del empleado.');
       return;
     }
+  }
 
-    const orderData = {
-      customerId: cliente.trim() || '2d399ebc-458f-43c9-b6a1-78b6e2bd10ef',
-      items: productosForm.map(p => ({ productId: p.productId, quantity: p.quantity }))
-    };
+  console.log("NOOOO", empleadoIdFinal);
 
-    try {
-      await axios.post('http://localhost:3030/api/orders', orderData);
-      alert('Venta registrada con éxito');
-      setProductosForm([{ productId: '', quantity: 1 }]);
-      setCliente('');
-      setMetodoPago('');
-      setVista('ver');
-      const response = await axios.get('http://localhost:3030/api/orders');
-      setVentasRegistradas(response.data.orders);
-    } catch (error) {
-      console.error('Error al registrar venta:', error);
-    }
+  const orderData = {
+    employeeId: empleadoIdFinal,
+    customerId: cliente.trim() || '2d399ebc-458f-43c9-b6a1-78b6e2bd10ef',
+    items: productosForm.map(p => ({
+      productId: p.productId,
+      quantity: p.quantity
+    }))
   };
+
+  console.log("Order data", orderData);
+
+  try {
+    await axios.post('http://localhost:3030/api/orders', orderData);
+    alert('Venta registrada con éxito');
+
+    // limpiar formulario
+    setProductosForm([{ productId: '', quantity: 1 }]);
+    setCliente('');
+    setMetodoPago('');
+    setVista('ver');
+
+    // volver a traer las órdenes con nombres de cliente y empleado
+    const ordersRes = await axios.get('http://localhost:3030/api/orders');
+    const orders = ordersRes.data.orders;
+
+    const customersRes = await axios.get('http://localhost:3020/api/customers');
+    const customers = customersRes.data.customers || [];
+
+    const employeesRes = await axios.get('http://localhost:3010/api/employees');
+    const employees = employeesRes.data.employees || [];
+
+    const customerMap = {};
+    customers.forEach(c => {
+      customerMap[c.id] = `${c.names} ${c.lastnames}`;
+    });
+
+    const employeeMap = {};
+    employees.forEach(e => {
+      employeeMap[e.id] = `${e.names} ${e.lastnames}`;
+    });
+
+    const ordersWithNames = orders.map(order => ({
+      ...order,
+      customerName: customerMap[order.customerId] || 'Cliente desconocido',
+      employeeName: employeeMap[order.employeeId] || 'Empleado desconocido'
+    }));
+
+    setVentasRegistradas(ordersWithNames);
+
+  } catch (error) {
+    console.error('Error al registrar venta:', error);
+  }
+};
+
 
   return (
     <div className="registro-ventas-container">
@@ -140,7 +240,7 @@ const RegistroVentas = () => {
                 type="number"
                 min="1"
                 value={producto.quantity}
-                onChange={(e) => handleProductoChange(index, 'cantidad', e.target.value)}
+                onChange={(e) => handleProductoChange(index, 'quantity', e.target.value)}
               />
 
               <button
@@ -180,8 +280,6 @@ const RegistroVentas = () => {
           >
             <option value="">Seleccione método de pago</option>
             <option value="Efectivo">Efectivo</option>
-            <option value="Tarjeta">Tarjeta</option>
-            <option value="Transferencia">Transferencia</option>
           </select>
 
           <p style={{ marginTop: '15px', fontWeight: 'bold' }}>
@@ -203,7 +301,7 @@ const RegistroVentas = () => {
               <table className="inventory-table">
                 <thead>
                   <tr>
-                    <th>ID</th>
+                    <th>Empleado</th>
                     <th>Cliente</th>
                     <th>Productos</th>
                     <th>Total</th>
@@ -213,8 +311,8 @@ const RegistroVentas = () => {
                 <tbody>
                   {ventasRegistradas.map((venta) => (
                     <tr key={venta.id}>
-                      <td>{venta.id}</td>
-                      <td>{venta.customerId}</td>
+                      <td>{venta.employeeName}</td>
+                      <td>{venta.customerName}</td>
                       <td>
                         <ul>
                           {venta.orderDetails.map((p, i) => (
