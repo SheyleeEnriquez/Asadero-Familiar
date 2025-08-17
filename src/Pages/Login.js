@@ -83,21 +83,19 @@ function Login() {
           <button type="submit">Ingresar</button>
 
           {/* Texto añadido debajo del botón */}
-          <p className="forgot-password-text">¿Olvidaste tu contraseña?</p>
+          <div style={{ marginTop: '15px', textAlign: 'center' }}>
+            <Link 
+              to="/olvido-contraseña" 
+              style={{
+                color: '#8b7355',
+                fontSize: '14px',
+                textDecoration: 'underline'
+              }}
+            >
+            ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
         </form>
-
-        <div style={{ marginTop: '15px', textAlign: 'center' }}>
-          <Link 
-            to="/olvido-contraseña" 
-            style={{
-              color: '#8b7355',
-              fontSize: '14px',
-              textDecoration: 'underline'
-            }}
-          >
-          ¿Olvidaste tu contraseña?
-          </Link>
-        </div>
       </div>
     </div>
   );
